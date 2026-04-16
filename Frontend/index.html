@@ -5,12 +5,14 @@
 
 <script>
     async function getMoi() {
-        const res = await fetch("http://localhost:5050/api/moi");
+        const userId = 1;
+
+        const res = await fetch(`http://localhost:5050/api/get_user_location?user_id=${userId}`);
         const data = await res.json();
 
         console.log(data);
 
-        document.getElementById("asd").textContent = data.message;
+        document.getElementById("asd").innerHTML = data.location;
     }
 
     getMoi();
