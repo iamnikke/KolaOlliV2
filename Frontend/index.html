@@ -1,0 +1,19 @@
+<html>
+<body>
+<h1>Hello World!</h1>
+<span id="asd"></span>
+
+<script>
+    async function getMoi() {
+        const res = await fetch("http://localhost:5050/api/moi");
+        const data = await res.json();
+
+        console.log(data);
+
+        document.getElementById("asd").textContent = data.message;
+    }
+
+    getMoi();
+</script>
+</body>
+</html>
