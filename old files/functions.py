@@ -1,0 +1,491 @@
+from geopy.distance import geodesic
+
+from queryDb import queryDb
+from decimal import Decimal
+from geopy import distance
+import random
+from datetime import timedelta
+
+# Get user location
+def get_user_location(user_id):
+
+    result = queryDb(f"SELECT location FROM user_info where id = {user_id}")
+
+    return result
+
+
+# Move player
+def move_player(icao, travel_distance, user_money, playerData):
+
+    user_id = playerData.id
+
+    prev_travel_distance = queryDb(f"SELECT total_travel_km FROM user_info where id = {user_id}")[0][0]
+
+    total_travel_distance = Decimal(travel_distance) + prev_travel_distance
+
+    game_id = playerData.id
+    queryDb(f"UPDATE user_info SET location = '{icao}', total_travel_km = '{total_travel_distance}', money = '{user_money}' WHERE id = '{game_id}'")
+    playerData.location = icao
+    playerData.total_travel_km = total_travel_distance
+
+    return True
+
+# Pick transportation method
+class Airplane:
+    def __init__(self, name, speed, capacity,):
+        self.name = name
+        self.speed =speed
+        self.capacity = capacity
+
+    def __repr__(self):
+        return f"Lentokone: (Nimi: {self.name}, Nopeus: {self.speed} km/h, Kapasiteetti: {self.capacity} tölkkiä)"
+
+
+#tähän voidaan vaihtaa lentokoneiden statseja
+def init_vehicles():
+    small_airplane = Airplane("pieni lentokone", 1000, 50)
+    medium_airplane = Airplane("keskikokoinen lentokone", 1500, 100)
+    big_airplane = Airplane("iso lentokone", 2000, 300)
+
+    # Palautetaan lista kulkuneuvo-olioista
+    return [small_airplane, medium_airplane, big_airplane]
+
+
+# Reduce money
+def reduceMoney(playerData, priceAmount):
+
+    # Muuttuja pelkän pelaajan ID:n erottamiseksi oliosta
+    playerId = playerData.id
+
+    ## [0][0] = ensimmäinen rivi, ensimmäinen sarake
+    moneyBalance = queryDb(f"SELECT money FROM user_info WHERE id = '{playerId}'")[0][0]
+
+    priceAmount = Decimal(str(priceAmount))
+
+    if moneyBalance < priceAmount:
+        # debug
+        #print("Ei riittävästi rahaa!")
+        #print(moneyBalance)
+
+        # Palauta false jos rahat eivät riitä maksuun
+        return False
+
+    #print("Rahat riittää")
+    #print(moneyBalance)
+    newBalance = moneyBalance - priceAmount
+
+    # Päivitä olio
+    playerData.money = newBalance
+    # Päivitä käyttäjän rahasaldo tietokantaan
+    queryDb(f"UPDATE user_info SET money = '{newBalance}' WHERE id = '{playerId}'")
+
+    # Palauta true jos rahat riittävät
+    return True
+
+
+# Effluent
+def calculate_effluent(distance):
+    effluent = distance*246
+    return effluent
+
+
+# Calculate distance
+def calculate_distance(currentLocation, targetCountry):
+
+    # haetaan lentokenttien koordinaatit tietokannasta
+    currentLocationXY = queryDb(f"SELECT latitude_deg, longitude_deg FROM airport WHERE ident = '{currentLocation}'")
+    targetCountryXY = queryDb(f"SELECT latitude_deg, longitude_deg FROM airport WHERE ident = '{targetCountry}'")
+
+    # laskee lentokenttien etäisyyden
+    dist = geodesic(currentLocationXY, targetCountryXY).km
+    # print (f"Etäisyys: {dist.km:.2f} km")
+    return dist
+
+
+# Calculate fines
+def calculate_fines(capacity, load):
+    #lasketaan ylilasti
+    overload = load - capacity
+    #jos ylilastia on enemmän kuin kapasiteettia, törkeä sakko
+    if overload > capacity:
+        fines = (load - capacity) * 10
+
+        #muuten normisakko
+    else:
+        fines = (load - capacity) * 5
+    # palauta sakon määrä
+    return fines
+
+
+# Calculate fly cost
+def calculate_fly_cost(dist):
+    price = dist * 0.2
+    return price
+
+
+# Demo function
+def demoFunction(currentLocation, targetCountry):
+
+    # Kyselyt tietokantaan (Varmaan väärin mutta tähän tyyliin kuitenkin)
+    currentLocationXY = queryDb(f"SELECT longitude_deg, latitude_deg FROM airport WHERE ident = '{currentLocation}'")
+    targetCountryXY = queryDb(f"SELECT longitude_deg, latitude_deg FROM airport WHERE ident = '{targetCountry}'")
+
+    print(currentLocationXY)
+    print(targetCountryXY)
+
+# KOKEILEMISEKSI KUTSU FUNKTIOTA SAMASSA TIEDOSTOSSA KIINTEILLÄ PARAMETREILLÄ:
+demoFunction("EFHK", "EFPE")
+
+# Sen jälkeen valitse pycharm oikealta ylhäältä main -> Current File ja suorita scripti
+
+
+# Get caught function
+def get_caught():
+    number = random.randint(0,100)
+    if number > 10:
+        return True
+    else:
+        return False
+
+
+# Lisää rahaa
+def add_money(playerData, priceAmount):
+
+    playerId = playerData.id
+
+    ## [0][0] = ensimmäinen rivi, ensimmäinen sarake
+    moneyBalance = queryDb(f"SELECT money FROM user_info WHERE id = '{playerId}'")[0][0]
+
+    priceAmount = Decimal(priceAmount)
+
+    newBalance = moneyBalance + priceAmount
+
+    # Päivitä olio
+    playerData.money = newBalance
+    # Päivitä käyttäjän rahasaldo tietokantaan
+    queryDb(f"UPDATE user_info SET money = '{newBalance}' WHERE id = '{playerId}'")
+
+    # Palauta true jos rahat riittävät
+    return True
+
+
+# Päivittää alku ja loppu locationit tietokantaan uusille riveille
+def update_passport(playerData, currentLocation, targetCountry, co2):
+    playerid = playerData.id
+
+    queryDb(f"INSERT INTO passport(id, start_location, end_location, co2_consumed) VALUES ('{playerid}', '{currentLocation}', '{targetCountry}', '{co2}')")
+
+    return True
+
+
+# Reduce cola
+def reduceCola(playerData, colaAmount):
+
+    # Muuttuja pelkän pelaajan ID:n erottamiseksi oliosta
+    playerId = playerData.id
+
+    ## [0][0] = ensimmäinen rivi, ensimmäinen sarake
+    colaBalance = queryDb(f"SELECT coca_cola FROM user_info WHERE id = '{playerId}'")[0][0]
+
+    if colaBalance < colaAmount:
+        # debug
+        #print("Ei riittävästi colaa!")
+        #print(colaBalance)
+
+        # Palauta false jos colaa ei tarpeeksi stashis
+        return False
+
+    newBalance = colaBalance - colaAmount
+
+    # Päivitä olio
+    playerData.coca_cola = newBalance
+    # Päivitä käyttäjän colasaldo tietokantaan
+    queryDb(f"UPDATE user_info SET coca_cola = '{newBalance}' WHERE id = '{playerId}'")
+
+    # Palauta true jos colaa tarpeeks
+    return True
+
+
+#päivittää lahjonnat
+def updatebribes(playerData,amount):
+    playerId = playerData.id
+    currentBribesAmount = queryDb(f"select bribes from user_info where id = '{playerId}'")[0][0]
+    newBribesAmount = currentBribesAmount + amount
+
+    playerData.bribes = newBribesAmount
+    queryDb(f"UPDATE user_info SET bribes='{newBribesAmount}' WHERE id = '{playerId}'")
+    return True
+
+
+# Päivittää ajan
+def update_time(playerId, dist, speed):
+
+    if speed <= 0:
+        return "Nopeuden pitää olla suurempi kuin nolla"
+    elif dist <= 0:
+        return "Matkan pituuden pitää olla suurempi kuin nolla"
+
+    hours_decimal = dist / speed
+
+    duration = timedelta(hours=hours_decimal)
+    total_seconds = int(duration.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    time_str = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    queryDb(f"UPDATE user_info SET clock = ADDTIME(clock, '{time_str}') WHERE id = '{playerId}'")
+
+    return True
+
+# Lisää multiplierin myyntihintaan
+def multiply_load(distance, load):
+    multiplier = distance / 1000 + 1
+    loadValue = load * multiplier * 3
+    return loadValue
+
+
+# päästöt
+def updateco2(playerData, amount):
+    playerId = playerData.id
+    currentCo2Consumed = queryDb(f"select total_co2_consumed from user_info where id = '{playerId}'")[0][0]
+    newCo2Consumed = currentCo2Consumed + Decimal(amount)
+
+    playerData.total_co2_consumed = newCo2Consumed
+    queryDb(f"UPDATE user_info SET total_co2_consumed='{newCo2Consumed}' WHERE id = '{playerId}'")
+    return True
+
+
+#passport rivien poisto niin, että jää vain 1 "default rivi"
+def gameover(id):
+
+    queryDb(f"delete from passport where id = '{id}'")
+    queryDb(f"delete from user_info where id = '{id}'")
+
+    print(r"""
+         _____                                                                                  _____ 
+        ( ___ )                                                                                ( ___ )
+         |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   | 
+         |   |                                                                                  |   | 
+         |   |        ____      _      __  __   _____      ___   __     __  _____   ____        |   | 
+         |   |       / ___|    / \    |  \/  | | ____|    / _ \  \ \   / / | ____| |  _ \       |   | 
+         |   |      | |  _    / _ \   | |\/| | |  _|     | | | |  \ \ / /  |  _|   | |_) |      |   | 
+         |   |      | |_| |  / ___ \  | |  | | | |___    | |_| |   \ V /   | |___  |  _ <       |   | 
+         |   |       \____| /_/   \_\ |_|  |_| |_____|    \___/     \_/    |_____| |_| \_\      |   | 
+         |   |                                                                                  |   | 
+         |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___| 
+        (_____)                                                                                (_____)
+        
+        jouduit vankilaan. älä tiputa saippuaa.
+        
+        """)
+
+    return
+
+
+# Lisää kolaa
+def addCola(playerData, colaAmount):
+
+    # Muuttuja pelkän pelaajan ID:n erottamiseksi oliosta
+    playerId = playerData.id
+
+    ## [0][0] = ensimmäinen rivi, ensimmäinen sarake
+    colaBalance = queryDb(f"SELECT coca_cola FROM user_info WHERE id = '{playerId}'")[0][0]
+
+    newBalance = colaBalance + colaAmount
+
+    # Päivitä olio
+    playerData.coca_cola = newBalance
+    # Päivitä käyttäjän colasaldo tietokantaan
+    queryDb(f"UPDATE user_info SET coca_cola = '{newBalance}' WHERE id = '{playerId}'")
+
+    return True
+
+
+#Lisää xptä
+def addXp(playerData, xpAmount):
+
+    # Muuttuja pelkän pelaajan ID:n erottamiseksi oliosta
+    playerId = playerData.id
+
+    ## [0][0] = ensimmäinen rivi, ensimmäinen sarake
+    xpBalance = queryDb(f"SELECT xp FROM user_info WHERE id = '{playerId}'")[0][0]
+
+    newBalance = xpBalance + xpAmount
+
+    # Päivitä olio
+    playerData.xp = newBalance
+    # Päivitä käyttäjän xp tietokantaan
+    queryDb(f"UPDATE user_info SET xp = '{newBalance}' WHERE id = '{playerId}'")
+
+    return True
+
+
+# Printtaa lentokone vaihtoehdot
+def printSelectAirportHud(vehicles, playerData, prices):
+    print("========================================")
+
+    print(f"""
+           _
+         -=\\`\\
+     |\\ ____\\_\\__
+   -=\\c`"*"*"*"* "`)
+      `~~~~~/ /~~`
+        -==/ /
+          '-'
+
+          VALITSE LENTOKONE
+          Sinulla on {playerData.coca_cola} colaa
+          Ja {playerData.money} euroa rahaa
+    """)
+
+    i = 0
+
+    for vehicle in vehicles:
+        i += 1
+
+        print(f"""
+        {i}. {vehicle.name} 
+        Nopeus: {vehicle.speed} km/h 
+        Kapasiteetti: {vehicle.capacity} tölkkiä
+        Hinta: {prices[i - 1]:.2f} €
+        """)
+
+    print("========================================")
+
+    return
+
+
+# Printtaa matkustusvaihtoehdot
+def printSelectCountryHud(playerData):
+
+    allowedCountries = {
+        'Austria': 'LOWW',
+        'Bryssel, Belgium': 'EBBR',
+        'Madrid, Espanja': 'LEMD',
+        'Rooma, Italia': 'LIRF',
+        'Luxemburg, Luxemburg': 'ELLX',
+        'Varsova, Puola': 'EPWA',
+        'Pariisi, Ranska': 'LFPG',
+        'Kööpenhamina, Tanska': 'EKCH',
+        'Ateena, Kreikka': 'LGAV',
+        'Minsk, Valko-Venäjä': 'UMMS',
+        'Viro, Tallinna': 'EETN',
+    }
+
+    print("========================================")
+
+    for country, icao in allowedCountries.items():
+        dist = calculate_distance(playerData.location, icao)
+        price = float(f"{calculate_fly_cost(dist):.2f}")
+
+        canAfford = ""
+
+        if playerData.money > price:
+            canAfford = "Rahat riittää ✅"
+        else:
+            canAfford = "Rahat eivät riitä ❌"
+
+        print(icao + " --> " + country)
+        print("     ", int(dist), "km päässä | Meno-paluu", price, "€ | ", canAfford)
+        print("")
+
+
+    print("========================================")
+
+    return
+
+
+#kasvatetaan kokonaismatkaa
+def updatedistance(playerData, amount):
+    playerId = playerData.id
+    currentDistanceAmount = queryDb(f"select total_travel_km from user_info where id = '{playerId}'")[0][0]
+    newDistanceAmount = currentDistanceAmount + amount
+
+    playerData.total_travel_km = newDistanceAmount
+    queryDb(f"UPDATE user_info SET total_travel_km='{newDistanceAmount}' WHERE id = '{playerId}'")
+    return True
+
+
+def printWelcomeHud(xpValue, loadValue, playerData):
+    print("""
+    ========================================
+
+
+
+
+
+          ////^\\\\
+          | ^   ^ |
+         @ (o) (o) @
+          |   <   |
+          |  ___  |
+           \\_____/
+         ____|  |____
+    ========================
+    > Saavuit kohteeseen.
+
+    Tervetuloa maahan!
+    """)
+
+    print(f"Ansaitsit {xpValue} tasopistettä!")
+    print(f"Sinulla on nyt yhteensä {playerData.xp:.2f} tasopistettä!")
+    print("")
+    print(f"Tienasit {loadValue:.2f} €!")
+    print(f"Sinulla on nyt {playerData.money:.2f} €!")
+
+    return
+
+
+def printTripFinished(colaAmount):
+    print("========================================")
+    print("""
+
+                 ,#####,
+                 #_   _#
+                 |a` `a|
+                 |  u  |
+                 \\  =  /
+                 |\\___/|
+        ___ ____/:     :\\____ ___
+      .'   `.-===-\\   /-===-.`   '.
+     /      .-\"\"\"\"\"--\"\"\"\"\"-.      \\\\              ////^\\\\
+    /'             =:=             '\\\\            | ^   ^ |
+  .'  ' .:    o   -=:=-   o    :. '  `.          @ (o) (o) @
+  (.'   /'. '-.....-|-.....-' .'\\   '.)           |   <   |
+  /' ._/   ".     --:--     ."   \\_. '\\\\          |  ___  |
+ |  .'|      ".  ---:---  ."      |'.  |           \\_____/
+ |  : |       |  ---:---  |       | :  |         ____|  |____
+    ========================
+    > Saavuit kotiin.
+          """)
+    print(f"Faija toi sinulle töistä {colaAmount} colaa.")
+
+    return
+
+
+def printWinner(id):
+    queryDb(f"delete from passport where id = '{id}'")
+    queryDb(f"delete from user_info where id = '{id}'")
+    print("========================================")
+    print("""
+
+                     ,#####,
+                     #_   _#
+                     |a` `a|
+                     |  u  |
+                     \\  =  /
+                     |\\___/|
+            ___ ____/:     :\\____ ___
+          .'   `.-===-\\   /-===-.`   '.
+         /      .-\"\"\"\"\"--\"\"\"\"\"-.      \\\\              ////^\\\\
+        /'             =:=             '\\\\            | ^   ^ |
+      .'  ' .:    o   -=:=-   o    :. '  `.          @ (o) (o) @
+      (.'   /'. '-.....-|-.....-' .'\\   '.)           |   <   |
+      /' ._/   ".     --:--     ."   \\_. '\\\\          |  ___  |
+     |  .'|      ".  ---:---  ."      |'.  |           \\_____/
+     |  : |       |  ---:---  |       | :  |         ____|  |____
+        ========================
+        > Voitit pelin. Faija on ylpiä!
+              """)
+    return
