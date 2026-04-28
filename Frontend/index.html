@@ -3,19 +3,69 @@
 <h1>Hello World!</h1>
 <span id="asd"></span>
 
+<div class="ui-card">
+  <p>massit</p>
+  <span id="ui-money"></span>
+</div>
+<div class="ui-card">
+  <p>colat</p>
+  <span id="ui-cola"></span>
+</div>
+<div class="ui-card">
+  <p>kello</p>
+  <span id="ui-clock"></span>
+</div>
+<div class="ui-card">
+  <p>sijainti</p>
+  <span id="ui-location"></span>
+</div>
+
+
+<form id="authForm">
+  <input type="text" id="username" name="username" placeholder="Username" />
+  <button type="submit">Submit</button>
+</form>
+
 <script>
-    async function getMoi() {
-        const userId = 1;
 
-        const res = await fetch(`http://localhost:5050/api/get_user_location?user_id=${userId}`);
-        const data = await res.json();
+// helper to get ?username=...
+function getUsernameFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("username");
+}
 
-        console.log(data);
+const username = getUsernameFromURL();
 
-        document.getElementById("asd").innerHTML = data.location;
-    }
+// if no username → show form, hide HUD
+if (!username) {
+  document.querySelectorAll(".ui-card").forEach(el => el.style.display = "none");
+} else {
+  // hide form
+  document.getElementById("authForm").style.display = "none";
 
-    getMoi();
+  // fetch user data
+  fetch(`http://localhost:5050/api/authenticate?username=${username}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("ui-money").innerHTML = data.money;
+      document.getElementById("ui-cola").innerHTML = data.coca_cola;
+      document.getElementById("ui-clock").innerHTML = data.clock;
+      document.getElementById("ui-location").innerHTML = data.location;
+    });
+}
+
+
+// when submitting form → reload page with ?username=
+document.getElementById("authForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const username = document.getElementById("username").value;
+
+  if (username) {
+    window.location.href = `?username=${username}`;
+  }
+});
+
 </script>
 </body>
 </html>
