@@ -33,19 +33,5 @@ mysql.server start
 
 
 
-## Vaihe 2: UI-ominaisuudet | pohjaversio
+## Vaihe 2: Lentämienn
 
-### Elementti: Kello | Nikke
-
-
-### Elementti: Kolat | Matti
-
-### Elementti: Raha |
-
-### Elementti: XP-bar
-
-### Elementit: Kohdemaat
-
-## Vaihe 3: Pelitoiminnot
-
-##

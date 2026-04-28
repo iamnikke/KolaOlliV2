@@ -2,6 +2,10 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import mysql.connector
 
+from geopy.distance import geodesic
+from geopy import distance
+
+
 app = Flask(__name__)
 
 # headers: salli liikenne localhostista
@@ -126,6 +130,51 @@ def create_user(username):
         DEFAULT_USER["sales"],
         DEFAULT_USER["home_port"]
     ))
+
+
+@app.route("/api/get_flight_info", methods=["GET"])
+def get_flight_info():
+    try:
+        currentLocation = "EFHK"
+        targetCountry = request.args.get("icao", "").strip()
+
+        currentLocationXY = query_db(
+            "SELECT latitude_deg, longitude_deg FROM airport WHERE ident = %s",
+            (currentLocation,)
+        )
+
+        targetCountryXY = query_db(
+            "SELECT latitude_deg, longitude_deg FROM airport WHERE ident = %s",
+            (targetCountry,)
+        )
+
+        if not currentLocationXY or not targetCountryXY:
+            return jsonify({"error": "Airport not found"}), 404
+
+        current = currentLocationXY[0]
+        target = targetCountryXY[0]
+
+        current_coords = (
+            float(current["latitude_deg"]),
+            float(current["longitude_deg"])
+        )
+
+        target_coords = (
+            float(target["latitude_deg"]),
+            float(target["longitude_deg"])
+        )
+
+        dist = geodesic(current_coords, target_coords).km
+
+        return jsonify({
+            "distance": round(dist, 2),
+            "from": currentLocation,
+            "to": targetCountry
+        })
+
+    except Exception as error:
+        print("FLIGHT ERROR:", error)
+        return jsonify({"error": "VIRHE"}), 500
 
 
 # Testipätkä, saa poistaa
