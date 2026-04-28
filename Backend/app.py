@@ -9,16 +9,16 @@ from geopy import distance
 app = Flask(__name__)
 
 # headers: salli liikenne localhostista
-CORS(app, origins=["http://localhost:3000"])
+CORS(app)
 
 
 # db asetukset
 DB_CONFIG = {
     "host": "127.0.0.1",
     "port": 3306,
-    "user": "admin",
-    "password": "admin",
-    "database": "kolaolligame",
+    "user": "root",
+    "password": "kissa123",
+    "database": "cola_game",
     "autocommit": True
 }
 
@@ -181,6 +181,18 @@ def get_flight_info():
 @app.route("/api/moi", methods=["GET"])
 def hello():
     return jsonify({"message": "moi mikko"})
+
+# hakee hinnat lennolle
+@app.route("/api/calculate_cost", methods=["GET"])
+def get_cost():
+    dist = float(request.args.get("dist"))
+    plane_idx = int(request.args.get("plane_idx"))
+
+    # Python laskee hinnan (sama logiikka kuin v1:ssä)
+    multipliers = [1.0, 1.2, 1.5]
+    price = (dist * 0.2) * multipliers[plane_idx]
+
+    return jsonify({"price": round(price, 2)})
 
 
 
