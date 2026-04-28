@@ -4,34 +4,32 @@
 <span id="asd"></span>
 
 <div class="ui-card">
-  <p>massit</p>
-  <span id="ui-money"></span>
+    <p>massit</p>
+    <span id="ui-money"></span>
 </div>
 <div class="ui-card">
-  <p>colat</p>
-  <span id="ui-cola"></span>
+    <p>colat</p>
+    <span id="ui-cola"></span>
 </div>
 <div class="ui-card">
-  <p>kello</p>
-  <span id="ui-clock"></span>
+    <p>kello</p>
+    <span id="ui-clock"></span>
 </div>
 <div class="ui-card">
-  <p>sijainti</p>
-  <span id="ui-location"></span>
+    <p>sijainti</p>
+    <span id="ui-location"></span>
 </div>
 
 <div class="ui-card">
-  <p>kokonaismatka</p>
-  <span id="ui-total-travel"></span>
+    <p>kokonaismatka</p>
+    <span id="ui-total-travel"></span>
 </div>
-
 
 
 <button class="ui-select-country" id="EBBR">Austria</button>
 <button class="ui-select-country" id="LOWW">Bryssel, Belgium</button>
 <button class="ui-select-country" id="LEMD">Madrid, Espanja</button>
 <button class="ui-select-country" id="LIRF">Rooma, Italia</button>
-
 
 
 <!--
@@ -54,79 +52,164 @@
     -->
 
 <form id="authForm">
-  <input type="text" id="username" name="username" placeholder="Username" />
-  <button type="submit">Submit</button>
+    <input type="text" id="username" name="username" placeholder="Username"/>
+    <button type="submit">Submit</button>
 </form>
-
-
-
-
 
 
 <div class="ui-flight-container" style="border: solid 1px black">
 
-  <h1 class="ui-flight-title" id="ui-flight-title">Kohdemaa</h1>
-  <h1 class="ui-flight-title" id="ui-flight-distance">Etäisyys</h1>
+    <h1 class="ui-flight-title" id="ui-flight-title">Kohdemaa</h1>
+    <h1 class="ui-flight-title" id="ui-flight-distance">Etäisyys</h1>
+    <button id="btn-fly" style="display:none;">Lessgo!</button>
+</div>
 
+<div id="ui-success-screen"
+     style="display:none; text-align: center; border: 2px solid gold; padding: 20px; margin-top: 20px;">
+    <h2 id="success-message">Saavuit perille!</h2>
+    <img id="country-image" src="" alt="Destination"
+         style="max-width: 400px; border-radius: 10px; margin-bottom: 15px;">
+    <br>
+    <button onclick="document.getElementById('ui-success-screen').style.display='none'">Sulje</button>
 </div>
 
 <script>
 
-// helper to get ?username=...
-function getUsernameFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("username");
-}
+  // helper to get ?username=...
+  function getUsernameFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('username');
+  }
 
-const username = getUsernameFromURL();
+  const username = getUsernameFromURL();
 
-// if no username → show form, hide HUD
-if (!username) {
-  document.querySelectorAll(".ui-card").forEach(el => el.style.display = "none");
-} else {
-  // hide form
-  document.getElementById("authForm").style.display = "none";
+  // if no username → show form, hide HUD
+  if (!username) {
+    document.querySelectorAll('.ui-card').forEach(el => el.style.display = 'none');
+  } else {
+    // hide form
+    document.getElementById('authForm').style.display = 'none';
 
-  // fetch user data
-  fetch(`http://localhost:5050/api/authenticate?username=${username}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("ui-money").innerHTML = data.money;
-      document.getElementById("ui-cola").innerHTML = data.coca_cola;
-      document.getElementById("ui-clock").innerHTML = data.clock;
-      document.getElementById("ui-location").innerHTML = data.location;
-      document.getElementById("ui-total-travel").innerHTML = data.total_travel_km;
+    // fetch user data
+    fetch(`http://localhost:5050/api/authenticate?username=${username}`).then(res => res.json()).then(data => {
+      document.getElementById('ui-money').innerHTML = data.money;
+      document.getElementById('ui-cola').innerHTML = data.coca_cola;
+      document.getElementById('ui-clock').innerHTML = data.clock;
+      document.getElementById('ui-location').innerHTML = data.location;
+      document.getElementById('ui-total-travel').innerHTML = data.total_travel_km;
     });
-}
+  }
 
-document.querySelectorAll(".ui-select-country").forEach(btn => {
-  btn.addEventListener("click", (e) => {
-    const icao = e.currentTarget.id;
+  document.querySelectorAll('.ui-select-country').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const icao = e.currentTarget.id;
 
-    fetch(`http://localhost:5050/api/get_flight_info?icao=${icao}`)
-      .then(res => res.json())
-      .then(data => {
-        console.log(data)
+      fetch(`http://localhost:5050/api/get_flight_info?icao=${icao}`).then(res => res.json()).then(data => {
+        console.log(data);
 
-        document.getElementById("ui-flight-title").innerHTML = data.from + "->" + data.to
-        document.getElementById("ui-flight-distance").innerHTML = data.distance
+        document.getElementById('ui-flight-title').innerHTML = data.from + '->' + data.to;
+        document.getElementById('ui-flight-distance').innerHTML = data.distance;
 
       });
     });
 
-});
+  });
 
+  // when submitting form → reload page with ?username=
+  document.getElementById('authForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-// when submitting form → reload page with ?username=
-document.getElementById("authForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+    const username = document.getElementById('username').value;
 
-  const username = document.getElementById("username").value;
+    if (username) {
+      window.location.href = `?username=${username}`;
+    }
+  });
 
-  if (username) {
-    window.location.href = `?username=${username}`;
-  }
-});
+  const countryImages = {
+    'LOWW': 'images/vienna.jpg',
+    'EBBR': 'images/brussels.jpg',
+    'LEMD': 'images/madrid.jpg',
+    'LIRF': 'images/rome.jpg',
+    'ELLX': 'images/luxembourg.jpg',
+    'EPWA': 'images/warsaw.png',
+    'LFPG': 'images/paris.jpg',
+    'EKCH': 'images/copenhagen.jpg',
+    'LGAV': 'images/athens.jpg',
+    'UMMS': 'images/minsk.jpg',
+    'EETN': 'images/tallinn.jpg',
+  };
+
+  // move player
+  // Configuration
+  let currentFlightData = null;
+  const API_BASE = 'http://localhost:5050/api';
+
+  // update all player stats at once
+  const updatePlayerUI = (user) => {
+    document.getElementById('ui-money').textContent = user.money;
+    document.getElementById('ui-location').textContent = user.location;
+    document.getElementById('ui-total-travel').textContent = user.total_travel_km;
+    // Add other fields from app.py as needed, like user.coca_cola
+  };
+
+  // Select Country
+  document.querySelectorAll('.ui-select-country').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const icao = e.currentTarget.id;
+
+      try {
+        const response = await fetch(`${API_BASE}/get_flight_info?icao=${icao}`);
+        const data = await response.json();
+
+        currentFlightData = data;
+        document.getElementById('ui-flight-title').textContent = `${data.from} -> ${data.to}`;
+        document.getElementById('ui-flight-distance').textContent = data.distance;
+        document.getElementById('btn-fly').style.display = 'block';
+      } catch (err) {
+        console.error('Flight info fetch failed:', err);
+      }
+    });
+  });
+
+  // Move Player
+  document.getElementById('btn-fly').addEventListener('click', async () => {
+    if (!currentFlightData) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/move_player`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: username,
+          icao: currentFlightData.to,
+          distance: currentFlightData.distance,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update stats
+        updatePlayerUI(data.user);
+
+        // Hide flight button
+        document.getElementById('btn-fly').style.display = 'none';
+
+        // Show Success Screen
+        const destIcao = currentFlightData.to;
+        const screenElement = document.getElementById('ui-success-screen');
+
+        document.getElementById('country-image').src = countryImages[destIcao] || 'images/default_airport.jpg';
+        document.getElementById('success-message').textContent = `Tervetuloa kohteeseen ${destIcao}!`;
+        screenElement.style.display = 'block';
+      } else {
+        alert(`Virhe: ${data.message}`);
+      }
+    } catch (err) {
+      console.error('Move request failed:', err);
+    }
+  });
 
 </script>
 </body>
