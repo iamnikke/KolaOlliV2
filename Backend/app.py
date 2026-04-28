@@ -9,16 +9,17 @@ from geopy import distance
 app = Flask(__name__)
 
 # headers: salli liikenne localhostista
-CORS(app, origins=["http://localhost:3000"])
 
+#CORS(app, origins=["http://localhost:3000"])
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # db asetukset
 DB_CONFIG = {
     "host": "127.0.0.1",
     "port": 3306,
-    "user": "admin",
-    "password": "admin",
-    "database": "kolaolligame",
+    "user": "",
+    "password": "",
+    "database": "cola_game",
     "autocommit": True
 }
 
@@ -210,6 +211,45 @@ def authenticate():
         print("AUTH ERROR:", error)
         return jsonify({"error": "VIRHE: "}), 500
 
+
+@app.route("/api/move_player", methods=["POST"])
+def move_player():
+    try:
+        data = request.json
+        username = data.get("username")
+        target_icao = data.get("icao")
+        dist = data.get("distance", 0) # This comes from the frontend calculation
+
+        user = get_user_by_username(username)
+        if not user:
+            return jsonify({"error": "Pelaajaa ei löytynyt"}), 404
+
+        # Calculate cost using the distance passed from the frontend
+        cost = float(dist) * 0.2
+
+        if float(user["money"]) < cost:
+            return jsonify({"success": False, "message": "Ei tarpeeksi rahaa!"}), 400
+
+        # Calculate New Values
+        new_money = float(user["money"]) - cost
+        new_total_dist = float(user["total_travel_km"]) + float(dist)
+
+        # Update Database
+        query_db("""
+            UPDATE user_info 
+            SET location = %s, total_travel_km = %s, money = %s 
+            WHERE username = %s
+        """, (target_icao, new_total_dist, new_money, username))
+
+        updated_user = get_user_by_username(username)
+        return jsonify({
+            "success": True,
+            "user": clean_user(updated_user)
+        })
+
+    except Exception as error:
+        print("MOVE ERROR:", error)
+        return jsonify({"error": str(error)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5050)
