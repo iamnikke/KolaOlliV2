@@ -36,7 +36,7 @@ async function openFlightMenu(icao, name) {
     }
 }
 
-// Apufunktio hinnan hakemiseen (jotta koodia ei tarvitse toistaa)
+// funktio hinnan hakemiseen
 async function updatePrice(dist, planeIdx) {
     const response = await fetch(`http://127.0.0.1:5050/api/calculate_cost?dist=${dist}&plane_idx=${planeIdx}`);
     const data = await response.json();
