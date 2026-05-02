@@ -73,7 +73,7 @@ def clean_user(user):
         "total_travel_km": float(user["total_travel_km"]),
         "total_co2_consumed": float(user["total_co2_consumed"]),
         "location": user["location"],
-        "clock": str(user["clock"]),  # muuttos time → string
+        "clock": str(user["clock"]),  # muuttos time -> string
         "bribes": user["bribes"],
         "bribes_succeeded": bool(user["bribes_succeeded"]),
         "caught": bool(user["caught"]),
@@ -222,12 +222,12 @@ def authenticate():
 def calculate_fines(capacity, load):
     overload = load - capacity
     if overload > capacity:
-        return (load - capacity) * 10  # Gross overload
-    return (load - capacity) * 5  # Standard fine
+        return (load - capacity) * 10  # overload
+    return (load - capacity) * 5  # perus sakko
 
 
 def get_caught():
-    # 90% chance to get caught if over capacity
+    # 90% chanssi jäädä kiinni jos yli capacityn
     return random.randint(0, 100) > 10
 
 
@@ -371,7 +371,7 @@ def return_home():
         if float(user["money"]) < cost:
             return jsonify({"success": False, "message": "Ei tarpeeksi rahaa paluulentoon! Peli ohi."}), 400
 
-        # Faija tuo uutta colaa 200-500 kpl (kuten main.py:ssä)
+        # Faija tuo uutta colaa 200-500 kpl
         added_cola = random.randint(200, 500)
 
         new_money = float(user["money"]) - cost

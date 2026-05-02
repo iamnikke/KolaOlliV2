@@ -43,3 +43,41 @@ ui-selection-label {
 
 .plane-name { font-weight: bold; display: block; }
 .plane-speed, .plane-capacity { font-size: 0.8em; color: #666; }
+
+#ui-bribe-screen {
+    display:none;
+    text-align: center;
+    border: 2px solid red;
+    background-color: #ffeeee;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#ui-success-screen {
+    display: none;
+    text-align: center;
+    border: 2px solid gold;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#success-sales-message {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: green;
+}
+
+#country-image {
+    max-width: 400px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+#btn-return-home {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
