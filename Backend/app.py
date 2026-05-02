@@ -17,8 +17,8 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 DB_CONFIG = {
     "host": "127.0.0.1",
     "port": 3306,
-    "user": "",
-    "password": "",
+    "user": "root",
+    "password": "kissa123",
     "database": "cola_game",
     "autocommit": True
 }
@@ -177,6 +177,16 @@ def get_flight_info():
         print("FLIGHT ERROR:", error)
         return jsonify({"error": "VIRHE"}), 500
 
+@app.route("/api/calculate_cost", methods=["GET"])
+def get_cost():
+    dist = float(request.args.get("dist"))
+    plane_idx = int(request.args.get("plane_idx"))
+
+    # Python laskee hinnan (sama logiikka kuin v1:ssä)
+    multipliers = [1.0, 1.2, 1.5]
+    price = (dist * 0.2) * multipliers[plane_idx]
+
+    return jsonify({"price": round(price, 2)})
 
 # Testipätkä, saa poistaa
 @app.route("/api/moi", methods=["GET"])
