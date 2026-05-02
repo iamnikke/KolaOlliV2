@@ -1,16 +1,15 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import mysql.connector
-
+import random
 from geopy.distance import geodesic
 from geopy import distance
-
 
 app = Flask(__name__)
 
 # headers: salli liikenne localhostista
 
-#CORS(app, origins=["http://localhost:3000"])
+# CORS(app, origins=["http://localhost:3000"])
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # db asetukset
@@ -18,11 +17,10 @@ DB_CONFIG = {
     "host": "127.0.0.1",
     "port": 3306,
     "user": "root",
-    "password": "kissa123",
+    "password": "Aaro22",
     "database": "cola_game",
     "autocommit": True
 }
-
 
 # default arvot uudelle pelaajalle
 DEFAULT_USER = {
@@ -63,6 +61,7 @@ def query_db(query, params=None):
 
     return result
 
+
 # Muuta db tietueet -> JSON että selain ymmärtää sitä
 def clean_user(user):
     return {
@@ -99,38 +98,35 @@ def get_user_by_username(username):
 # Luo uusi pelaaja
 def create_user(username):
     query_db("""
-        INSERT INTO user_info (
-            username,
-            money,
-            coca_cola,
-            xp,
-            total_travel_km,
-            total_co2_consumed,
-            location,
-            clock,
-            bribes,
-            bribes_succeeded,
-            caught,
-            sales,
-            home_port
-        ) VALUES (
-            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-        )
-    """, (
-        username,
-        DEFAULT_USER["money"],
-        DEFAULT_USER["coca_cola"],
-        DEFAULT_USER["xp"],
-        DEFAULT_USER["total_travel_km"],
-        DEFAULT_USER["total_co2_consumed"],
-        DEFAULT_USER["location"],
-        DEFAULT_USER["clock"],
-        DEFAULT_USER["bribes"],
-        DEFAULT_USER["bribes_succeeded"],
-        DEFAULT_USER["caught"],
-        DEFAULT_USER["sales"],
-        DEFAULT_USER["home_port"]
-    ))
+             INSERT INTO user_info (username,
+                                    money,
+                                    coca_cola,
+                                    xp,
+                                    total_travel_km,
+                                    total_co2_consumed,
+                                    location,
+                                    clock,
+                                    bribes,
+                                    bribes_succeeded,
+                                    caught,
+                                    sales,
+                                    home_port)
+             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+             """, (
+                 username,
+                 DEFAULT_USER["money"],
+                 DEFAULT_USER["coca_cola"],
+                 DEFAULT_USER["xp"],
+                 DEFAULT_USER["total_travel_km"],
+                 DEFAULT_USER["total_co2_consumed"],
+                 DEFAULT_USER["location"],
+                 DEFAULT_USER["clock"],
+                 DEFAULT_USER["bribes"],
+                 DEFAULT_USER["bribes_succeeded"],
+                 DEFAULT_USER["caught"],
+                 DEFAULT_USER["sales"],
+                 DEFAULT_USER["home_port"]
+             ))
 
 
 @app.route("/api/get_flight_info", methods=["GET"])
@@ -177,6 +173,7 @@ def get_flight_info():
         print("FLIGHT ERROR:", error)
         return jsonify({"error": "VIRHE"}), 500
 
+
 @app.route("/api/calculate_cost", methods=["GET"])
 def get_cost():
     dist = float(request.args.get("dist"))
@@ -188,11 +185,11 @@ def get_cost():
 
     return jsonify({"price": round(price, 2)})
 
+
 # Testipätkä, saa poistaa
 @app.route("/api/moi", methods=["GET"])
 def hello():
     return jsonify({"message": "moi mikko"})
-
 
 
 # Tunnistautumis flow eli hae pelaaja / luo käyttäjä
@@ -222,44 +219,187 @@ def authenticate():
         return jsonify({"error": "VIRHE: "}), 500
 
 
+def calculate_fines(capacity, load):
+    overload = load - capacity
+    if overload > capacity:
+        return (load - capacity) * 10  # Gross overload
+    return (load - capacity) * 5  # Standard fine
+
+
+def get_caught():
+    # 90% chance to get caught if over capacity
+    return random.randint(0, 100) > 10
+
+
 @app.route("/api/move_player", methods=["POST"])
 def move_player():
     try:
         data = request.json
         username = data.get("username")
         target_icao = data.get("icao")
-        dist = data.get("distance", 0) # This comes from the frontend calculation
+        dist = data.get("distance", 0)
+        load = int(data.get("load", 0))
+        plane_capacity = int(data.get("capacity", 50))
 
         user = get_user_by_username(username)
         if not user:
             return jsonify({"error": "Pelaajaa ei löytynyt"}), 404
 
-        # Calculate cost using the distance passed from the frontend
         cost = float(dist) * 0.2
 
         if float(user["money"]) < cost:
             return jsonify({"success": False, "message": "Ei tarpeeksi rahaa!"}), 400
 
-        # Calculate New Values
-        new_money = float(user["money"]) - cost
-        new_total_dist = float(user["total_travel_km"]) + float(dist)
+        if user["coca_cola"] < load:
+            return jsonify({"success": False, "message": "Ei tarpeeksi colaa varastossa!"}), 400
 
-        # Update Database
+        caught = False
+        fines = 0
+        if load > plane_capacity:
+            if get_caught():
+                caught = True
+                fines = calculate_fines(plane_capacity, load)
+
+        multiplier = (float(dist) / 1000) + 1
+        load_value = load * multiplier * 3
+
+        new_money = float(user["money"]) - cost + load_value
+        new_total_dist = float(user["total_travel_km"]) + float(dist)
+        new_cola = user["coca_cola"] - load
+
         query_db("""
-            UPDATE user_info 
-            SET location = %s, total_travel_km = %s, money = %s 
-            WHERE username = %s
-        """, (target_icao, new_total_dist, new_money, username))
+                 UPDATE user_info
+                 SET location        = %s,
+                     total_travel_km = %s,
+                     money           = %s,
+                     coca_cola       = %s
+                 WHERE username = %s
+                 """, (target_icao, new_total_dist, new_money, new_cola, username))
 
         updated_user = get_user_by_username(username)
+
         return jsonify({
             "success": True,
+            "caught": caught,
+            "fines": fines,
+            "sales_profit": load_value,
             "user": clean_user(updated_user)
         })
 
     except Exception as error:
         print("MOVE ERROR:", error)
         return jsonify({"error": str(error)}), 500
+
+
+@app.route("/api/handle_bribe", methods=["POST"])
+def handle_bribe():
+    data = request.json
+    username = data.get("username")
+    fines = float(data.get("fines"))
+    choice = data.get("choice")
+
+    user = get_user_by_username(username)
+    bribe_price = fines * 0.2
+    final_penalty = 0
+    msg = ""
+
+    if choice == "yes":
+        if float(user["money"]) < bribe_price:
+            return jsonify({"success": False, "message": "Ei rahaa edes lahjukseen!"})
+
+        if random.random() > 0.5:
+            final_penalty = fines * 2
+            msg = f"Lahjonta epäonnistui! Jouduit maksamaan tuplasakot ({final_penalty}€)."
+        else:
+            final_penalty = 0
+            msg = "Lahjonta onnistui! Selvisit pelkällä lahjuksen hinnalla."
+
+        total_deduction = bribe_price + final_penalty
+    else:
+        total_deduction = fines
+        msg = f"Maksoit normaalit sakot ({fines}€)."
+
+    new_money = float(user["money"]) - total_deduction
+
+    # Päivitetään rahat ja lahjontayritysten määrä
+    query_db("UPDATE user_info SET money = %s, bribes = bribes + 1 WHERE username = %s",
+             (new_money, username))
+
+    updated_user = get_user_by_username(username)
+
+    # Tarkistetaan menikö pelaaja konkurssiin
+    game_over = False
+    if new_money < 0:
+        game_over = True
+        msg += " Rahasi loppuivat – peli ohi!"
+
+    return jsonify({
+        "success": True,
+        "message": msg,
+        "gameover": game_over,
+        "user": clean_user(updated_user)
+    })
+
+
+@app.route("/api/return_home", methods=["POST"])
+def return_home():
+    try:
+        data = request.json
+        username = data.get("username")
+        user = get_user_by_username(username)
+
+        if not user:
+            return jsonify({"error": "Pelaajaa ei löytynyt"}), 404
+
+        home_port = user.get("home_port", "EFHK")
+
+        if user["location"] == home_port:
+            return jsonify({"success": False, "message": "Olet jo kotona!"}), 400
+
+        # Haetaan koordinaatit etäisyyden laskemiseksi takaisin kotiin
+        current_loc = query_db("SELECT latitude_deg, longitude_deg FROM airport WHERE ident = %s", (user["location"],))[
+            0]
+        home_loc = query_db("SELECT latitude_deg, longitude_deg FROM airport WHERE ident = %s", (home_port,))[0]
+
+        dist = geodesic(
+            (float(current_loc["latitude_deg"]), float(current_loc["longitude_deg"])),
+            (float(home_loc["latitude_deg"]), float(home_loc["longitude_deg"]))
+        ).km
+
+        cost = dist * 0.2
+
+        if float(user["money"]) < cost:
+            return jsonify({"success": False, "message": "Ei tarpeeksi rahaa paluulentoon! Peli ohi."}), 400
+
+        # Faija tuo uutta colaa 200-500 kpl (kuten main.py:ssä)
+        added_cola = random.randint(200, 500)
+
+        new_money = float(user["money"]) - cost
+        new_total_dist = float(user["total_travel_km"]) + dist
+        new_cola = user["coca_cola"] + added_cola
+
+        query_db("""
+                 UPDATE user_info
+                 SET location        = %s,
+                     total_travel_km = %s,
+                     money           = %s,
+                     coca_cola       = %s
+                 WHERE username = %s
+                 """, (home_port, new_total_dist, new_money, new_cola, username))
+
+        updated_user = get_user_by_username(username)
+
+        return jsonify({
+            "success": True,
+            "cost": round(cost, 2),
+            "added_cola": added_cola,
+            "user": clean_user(updated_user)
+        })
+
+    except Exception as error:
+        print("RETURN ERROR:", error)
+        return jsonify({"error": str(error)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5050)

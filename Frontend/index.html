@@ -69,30 +69,28 @@
 
     <p>Etäisyys: <span id="ui-flight-distance">0</span> km</p>
     <p>Hinta (menopaluu): <span id="ui-flight-cost">0</span> €</p>
-    <p>Colan määrä: <span id="ui-cola-in-menu">0</span> </p>
+    <p>Colan määrä: <span id="ui-cola-in-menu">0</span></p>
 
     <h3 class="ui-selection-label">Valitse lentokone:</h3>
 
     <div class="airplane-selector">
-
-        <div class="plane-card selected" data-index="0" onclick="selectPlane(this)">
+        <div class="plane-card selected" data-index="0" data-capacity="50" onclick="selectPlane(this)">
             <span class="plane-name">Pieni lentokone</span>
             <span class="plane-speed">Nopeus: 1000 km/h</span>
             <span class="plane-capacity">Kapasiteetti: 50 tölkkiä</span>
         </div>
 
-        <div class="plane-card" data-index="1" onclick="selectPlane(this)">
+        <div class="plane-card" data-index="1" data-capacity="100" onclick="selectPlane(this)">
             <span class="plane-name">Välimalli</span>
             <span class="plane-speed">Nopeus: 1500 km/h</span>
             <span class="plane-capacity">Kapasiteetti: 100 tölkkiä</span>
         </div>
 
-        <div class="plane-card" data-index="2" onclick="selectPlane(this)">
+        <div class="plane-card" data-index="2" data-capacity="300" onclick="selectPlane(this)">
             <span class="plane-name">Iso lentokone</span>
             <span class="plane-speed">Nopeus: 2000 km/h</span>
             <span class="plane-capacity">Kapasiteetti: 300 tölkkiä</span>
         </div>
-
     </div>
 
     <div class="cargo-selector">
@@ -104,7 +102,7 @@
         </div>
         <p><small>Kapasiteetti jäljellä: <span id="ui-capacity-left">0</span> tölkkiä</small></p>
 
-        <button id="btn-fly" >Lessgo!</button>
+        <button id="btn-fly">Lessgo!</button>
 
     </div>
 
@@ -113,152 +111,258 @@
 
 </div>
 
+<div id="ui-bribe-screen"
+     style="display:none; text-align: center; border: 2px solid red; background-color: #ffeeee; padding: 20px; margin-top: 20px;">
+    <h2>TULLI ISKI!</h2>
+    <p id="bribe-fine-text"></p>
+    <button id="btn-pay-fine">Maksa sakko</button>
+    <button id="btn-attempt-bribe">Yritä lahjoa (20% sakosta)</button>
+</div>
+
 <div id="ui-success-screen"
      style="display:none; text-align: center; border: 2px solid gold; padding: 20px; margin-top: 20px;">
     <h2 id="success-message">Saavuit perille!</h2>
+    <p id="success-sales-message" style="font-size: 1.2rem; font-weight: bold; color: green;"></p>
     <img id="country-image" src="" alt="Destination"
          style="max-width: 400px; border-radius: 10px; margin-bottom: 15px;">
     <br>
-    <button onclick="document.getElementById('ui-success-screen').style.display='none'">Sulje</button>
+    <button id="btn-return-home"
+            style="padding: 10px 20px; background-color: #3498db; color: white; border: none; cursor: pointer; border-radius: 5px;">
+        Palaa kotiin (EFHK) hakemaan lisää Colaa
+    </button>
 </div>
 
 <script>
 
-    // helper to get ?username=...
-    function getUsernameFromURL() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('username');
+
+  function getUsernameFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('username');
+  }
+
+  const username = getUsernameFromURL();
+
+  // if no username show form, hide HUD
+  if (!username) {
+    document.querySelectorAll('.ui-card').forEach(el => el.style.display = 'none');
+  } else {
+    // hide form
+    document.getElementById('authForm').style.display = 'none';
+
+    // fetch user data
+    fetch(`http://localhost:5050/api/authenticate?username=${username}`).then(res => res.json()).then(data => {
+      document.getElementById('ui-money').innerHTML = data.money;
+      document.getElementById('ui-cola').innerHTML = data.coca_cola;
+      document.getElementById('ui-clock').innerHTML = data.clock;
+      document.getElementById('ui-location').innerHTML = data.location;
+      document.getElementById('ui-total-travel').innerHTML = data.total_travel_km;
+    });
+  }
+
+  document.querySelectorAll('.ui-select-country').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const icao = e.currentTarget.id;
+
+      fetch(`http://localhost:5050/api/get_flight_info?icao=${icao}`).then(res => res.json()).then(data => {
+        console.log(data);
+
+        document.getElementById('ui-flight-title').innerHTML = data.from + '->' + data.to;
+        document.getElementById('ui-flight-distance').innerHTML = data.distance;
+
+      });
+    });
+
+  });
+
+  document.getElementById('authForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value;
+
+    if (username) {
+      window.location.href = `?username=${username}`;
     }
+  });
 
-    const username = getUsernameFromURL();
+  const countryImages = {
+    'LOWW': 'images/vienna.jpg',
+    'EBBR': 'images/brussels.jpg',
+    'LEMD': 'images/madrid.jpg',
+    'LIRF': 'images/rome.jpg',
+    'ELLX': 'images/luxembourg.jpg',
+    'EPWA': 'images/warsaw.png',
+    'LFPG': 'images/paris.jpg',
+    'EKCH': 'images/copenhagen.jpg',
+    'LGAV': 'images/athens.jpg',
+    'UMMS': 'images/minsk.jpg',
+    'EETN': 'images/tallinn.jpg',
+  };
 
-    // if no username → show form, hide HUD
-    if (!username) {
-        document.querySelectorAll('.ui-card').forEach(el => el.style.display = 'none');
+  // move player
+  // Configuration
+  let currentFlightData = null;
+  const API_BASE = 'http://localhost:5050/api';
+
+  // update all player stats at once
+  const updatePlayerUI = (user) => {
+    document.getElementById('ui-money').textContent = parseFloat(user.money).toFixed(2);
+    document.getElementById('ui-location').textContent = user.location;
+    document.getElementById('ui-total-travel').textContent = parseFloat(user.total_travel_km).toFixed(2);
+    document.getElementById('ui-cola').textContent = user.coca_cola;
+  };
+
+  let currentFines = 0;
+  let currentSalesProfit = 0;
+
+  // Select Country
+  document.querySelectorAll('.ui-select-country').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const icao = e.currentTarget.id;
+
+      try {
+        const response = await fetch(`${API_BASE}/get_flight_info?icao=${icao}`);
+        const data = await response.json();
+
+        currentFlightData = data;
+        document.getElementById('ui-flight-title').textContent = `${data.from} -> ${data.to}`;
+        document.getElementById('ui-flight-distance').textContent = data.distance;
+        document.getElementById('btn-fly').style.display = 'block';
+      } catch (err) {
+        console.error('Flight info fetch failed:', err);
+      }
+    });
+  });
+
+  // Move Player
+  document.getElementById('btn-fly').addEventListener('click', async () => {
+    if (!currentFlightData) return;
+
+    const colaLoad = document.getElementById('ui-cola-quantity').value;
+    const selectedPlane = document.querySelector('.plane-card.selected');
+    const planeCapacity = selectedPlane.getAttribute('data-capacity');
+
+    try {
+      const response = await fetch(`${API_BASE}/move_player`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: username,
+          icao: currentFlightData.to,
+          distance: currentFlightData.distance,
+          load: colaLoad,
+          capacity: planeCapacity,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update stats
+        currentSalesProfit = data.sales_profit || 0;
+        updatePlayerUI(data.user);
+
+        // Hide flight menu
+        document.querySelector('.ui-flight-container').style.display = 'none';
+
+        if (data.caught) {
+          currentFines = data.fines;
+          document.getElementById('bribe-fine-text').textContent = `Jäit kiinni ylilastista! Sakko: ${data.fines}€`;
+          document.getElementById('ui-bribe-screen').style.display = 'block';
+        } else {
+          showSuccessScreen();
+        }
+
+        // Show Success Screen
+        const destIcao = currentFlightData.to;
+        const screenElement = document.getElementById('ui-success-screen');
+
+        document.getElementById('country-image').src = countryImages[destIcao] || 'images/default_airport.jpg';
+        document.getElementById('success-message').textContent = `Tervetuloa kohteeseen ${destIcao}!`;
+        screenElement.style.display = 'block';
+      } else {
+        alert(`Virhe: ${data.message}`);
+      }
+    } catch (err) {
+      console.error('Move request failed:', err);
+    }
+  });
+  document.getElementById('btn-pay-fine').addEventListener('click', () => submitBribeChoice('no'));
+  document.getElementById('btn-attempt-bribe').addEventListener('click', () => submitBribeChoice('yes'));
+
+  async function submitBribeChoice(choice) {
+    try {
+      const response = await fetch(`${API_BASE}/handle_bribe`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          username: username,
+          fines: currentFines,
+          choice: choice,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        updatePlayerUI(data.user);
+        document.getElementById('ui-bribe-screen').style.display = 'none';
+        alert(data.message); // Kertoo onnistuiko lahjonta vai tuplaantuiko sakot
+
+        // Näytetään onnistumisruutu sakkojen/lahjonnan selvittelyn jälkeen
+        showSuccessScreen();
+      } else {
+        alert(`Virhe: ${data.message}`);
+      }
+    } catch (err) {
+      console.error('Bribe request failed:', err);
+    }
+  }
+
+  // Apufunktio onnistumisruudun näyttämiseen
+  function showSuccessScreen() {
+    const destIcao = currentFlightData.to;
+    const screenElement = document.getElementById('ui-success-screen');
+
+    document.getElementById('country-image').src = countryImages[destIcao] || 'images/default_airport.jpg';
+    document.getElementById('success-message').textContent = `Tervetuloa kohteeseen ${destIcao}!`;
+
+    // Näytä tienattu summa
+    if (currentSalesProfit > 0) {
+      document.getElementById(
+          'success-sales-message').textContent = `Myit colat ja tienasit ${currentSalesProfit.toFixed(2)} €!`;
     } else {
-        // hide form
-        document.getElementById('authForm').style.display = 'none';
-
-        // fetch user data
-        fetch(`http://localhost:5050/api/authenticate?username=${username}`).then(res => res.json()).then(data => {
-            document.getElementById('ui-money').innerHTML = data.money;
-            document.getElementById('ui-cola').innerHTML = data.coca_cola;
-            document.getElementById('ui-clock').innerHTML = data.clock;
-            document.getElementById('ui-location').innerHTML = data.location;
-            document.getElementById('ui-total-travel').innerHTML = data.total_travel_km;
-        });
+      document.getElementById(
+          'success-sales-message').textContent = `Et ottanut colaa mukaan, joten et tienannut mitään.`;
     }
 
-    document.querySelectorAll('.ui-select-country').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const icao = e.currentTarget.id;
+    screenElement.style.display = 'block';
+  }
 
-            fetch(`http://localhost:5050/api/get_flight_info?icao=${icao}`).then(res => res.json()).then(data => {
-                console.log(data);
+  // Kotiinpaluu napin logiikka
+  document.getElementById('btn-return-home').addEventListener('click', async () => {
+    try {
+      const response = await fetch(`${API_BASE}/return_home`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: username}),
+      });
 
-                document.getElementById('ui-flight-title').innerHTML = data.from + '->' + data.to;
-                document.getElementById('ui-flight-distance').innerHTML = data.distance;
+      const data = await response.json();
 
-            });
-        });
+      if (data.success) {
+        updatePlayerUI(data.user);
+        document.getElementById('ui-success-screen').style.display = 'none';
 
-    });
-
-    // when submitting form → reload page with ?username=
-    document.getElementById('authForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const username = document.getElementById('username').value;
-
-        if (username) {
-            window.location.href = `?username=${username}`;
-        }
-    });
-
-    const countryImages = {
-        'LOWW': 'images/vienna.jpg',
-        'EBBR': 'images/brussels.jpg',
-        'LEMD': 'images/madrid.jpg',
-        'LIRF': 'images/rome.jpg',
-        'ELLX': 'images/luxembourg.jpg',
-        'EPWA': 'images/warsaw.png',
-        'LFPG': 'images/paris.jpg',
-        'EKCH': 'images/copenhagen.jpg',
-        'LGAV': 'images/athens.jpg',
-        'UMMS': 'images/minsk.jpg',
-        'EETN': 'images/tallinn.jpg',
-    };
-
-    // move player
-    // Configuration
-    let currentFlightData = null;
-    const API_BASE = 'http://localhost:5050/api';
-
-    // update all player stats at once
-    const updatePlayerUI = (user) => {
-        document.getElementById('ui-money').textContent = user.money;
-        document.getElementById('ui-location').textContent = user.location;
-        document.getElementById('ui-total-travel').textContent = user.total_travel_km;
-        // Add other fields from app.py as needed, like user.coca_cola
-    };
-
-    // Select Country
-    document.querySelectorAll('.ui-select-country').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const icao = e.currentTarget.id;
-
-            try {
-                const response = await fetch(`${API_BASE}/get_flight_info?icao=${icao}`);
-                const data = await response.json();
-
-                currentFlightData = data;
-                document.getElementById('ui-flight-title').textContent = `${data.from} -> ${data.to}`;
-                document.getElementById('ui-flight-distance').textContent = data.distance;
-                document.getElementById('btn-fly').style.display = 'block';
-            } catch (err) {
-                console.error('Flight info fetch failed:', err);
-            }
-        });
-    });
-
-    // Move Player
-    document.getElementById('btn-fly').addEventListener('click', async () => {
-        if (!currentFlightData) return;
-
-        try {
-            const response = await fetch(`${API_BASE}/move_player`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    username: username,
-                    icao: currentFlightData.to,
-                    distance: currentFlightData.distance,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // Update stats
-                updatePlayerUI(data.user);
-
-                // Hide fligt menu
-                document.querySelector('.ui-flight-container').style.display = 'none';
-
-                // Show Success Screen
-                const destIcao = currentFlightData.to;
-                const screenElement = document.getElementById('ui-success-screen');
-
-                document.getElementById('country-image').src = countryImages[destIcao] || 'images/default_airport.jpg';
-                document.getElementById('success-message').textContent = `Tervetuloa kohteeseen ${destIcao}!`;
-                screenElement.style.display = 'block';
-            } else {
-                alert(`Virhe: ${data.message}`);
-            }
-        } catch (err) {
-            console.error('Move request failed:', err);
-        }
-    });
+        // Nollataan valikko ja näytetään ilmoitus
+        alert(`Lensit takaisin kotiin! Matka maksoi ${data.cost.toFixed(
+            2)}€. \nFaija toi sinulle töistä ${data.added_cola} colaa!`);
+      } else {
+        alert(`Virhe: ${data.message}`);
+      }
+    } catch (err) {
+      console.error('Return request failed:', err);
+    }
+  });
 
 </script>
 </body>
