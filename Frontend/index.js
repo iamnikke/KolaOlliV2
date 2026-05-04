@@ -149,6 +149,9 @@ const updatePlayerUI = (user) => {
   document.getElementById('ui-total-travel').textContent = parseFloat(
       user.total_travel_km).toFixed(2);
   document.getElementById('ui-cola').textContent = user.coca_cola;
+  if (user.clock) {
+    document.getElementById('ui-clock').textContent = user.clock;
+  }
 };
 
 let currentFines = 0;
@@ -300,7 +303,13 @@ document.getElementById('btn-return-home').
 
         if (data.success) {
           updatePlayerUI(data.user);
+
           document.getElementById('ui-success-screen').style.display = 'none';
+
+          document.querySelector('.main-game-popup').style.display = 'none';
+
+          selectedDestination = null;
+          currentFlightData = null;
 
           // Nollataan valikko ja näytetään ilmoitus
           alert(`Lensit takaisin kotiin! Faija toi sinulle töistä ${data.added_cola} colaa!`);

@@ -4,6 +4,7 @@ import mysql.connector
 import random
 from geopy.distance import geodesic
 from geopy import distance
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -231,6 +232,26 @@ def get_caught():
     return random.randint(0, 100) > 10
 
 
+def update_time(username, dist, speed):
+    if speed <= 0 or dist <= 0:
+        return False
+
+    # Lasketaan kesto tunteina (dist / speed)
+    hours_decimal = dist / speed
+
+    # Muunnetaan timedelta-objektiksi, jotta saadaan HH:MM:SS formaatti
+    duration = timedelta(hours=float(hours_decimal))
+    total_seconds = int(duration.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+    time_str = f"{hours:02}:{minutes:02}:{seconds:02}"
+
+    # Päivitetään tietokanta käyttämällä valmista query_db-funktiota
+    query_db("UPDATE user_info SET clock = ADDTIME(clock, %s) WHERE username = %s",
+             (time_str, username))
+    return True
+
 @app.route("/api/move_player", methods=["POST"])
 def move_player():
     try:
@@ -240,6 +261,7 @@ def move_player():
         dist = data.get("distance", 0)
         load = int(data.get("load", 0))
         plane_capacity = int(data.get("capacity", 50))
+        speed = int(data.get("speed", 1000))
 
         user = get_user_by_username(username)
         if not user:
@@ -266,6 +288,8 @@ def move_player():
         new_money = float(user["money"]) - cost + load_value
         new_total_dist = float(user["total_travel_km"]) + float(dist)
         new_cola = user["coca_cola"] - load
+
+        update_time(username, float(dist), speed)
 
         query_db("""
                  UPDATE user_info
@@ -346,6 +370,7 @@ def return_home():
     try:
         data = request.json
         username = data.get("username")
+        speed = int(data.get("speed", 1000))
         user = get_user_by_username(username)
 
         if not user:
@@ -365,6 +390,8 @@ def return_home():
             (float(current_loc["latitude_deg"]), float(current_loc["longitude_deg"])),
             (float(home_loc["latitude_deg"]), float(home_loc["longitude_deg"]))
         ).km
+
+        update_time(username, dist, speed)
 
         # Faija tuo uutta colaa 200-500 kpl
         added_cola = random.randint(200, 500)
@@ -391,7 +418,6 @@ def return_home():
     except Exception as error:
         print("RETURN ERROR:", error)
         return jsonify({"error": str(error)}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5050)
