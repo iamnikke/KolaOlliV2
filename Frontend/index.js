@@ -1,5 +1,26 @@
 'use strict';
 
+const airportLocations = [
+  {icao: 'EFHK', name: 'Helsinki (Home)', lat: 60.3172, lng: 24.9633},
+  {icao: 'LOWW', name: 'Austria', lat: 48.1103, lng: 16.5697},
+  {icao: 'EBBR', name: 'Bryssel, Belgium', lat: 50.9014, lng: 4.4844},
+  {icao: 'LEMD', name: 'Madrid, Espanja', lat: 40.4719, lng: -3.5626},
+  {icao: 'LIRF', name: 'Rooma, Italia', lat: 41.8003, lng: 12.2389},
+  {icao: 'ELLX', name: 'Luxemburg', lat: 49.6266, lng: 6.2115},
+  {icao: 'EPWA', name: 'Varsova, Puola', lat: 52.1657, lng: 20.9671},
+  {icao: 'LFPG', name: 'Pariisi, Ranska', lat: 49.0097, lng: 2.5479},
+  {icao: 'EKCH', name: 'Kööpenhamina, Tanska', lat: 55.6180, lng: 12.6560},
+  {icao: 'LGAV', name: 'Ateena, Kreikka', lat: 37.9364, lng: 23.9445},
+  {icao: 'UMMS', name: 'Minsk, Valko-Venäjä', lat: 53.8825, lng: 28.0307},
+  {icao: 'EETN', name: 'Tallinna, Viro', lat: 59.4133, lng: 24.8328},
+];
+
+// --- GLOBE INITIALIZATION ---
+const myGlobe = Globe()(document.getElementById('globeViz'))
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+    .pointOfView({ lat: 50, lng: 15, altitude: 1.5 }); // Centers camera on Europe
+
 const API_BASE = 'http://localhost:5050/api';
 
 function getUsernameFromURL() {
@@ -29,9 +50,6 @@ if (!username) {
             'ui-total-travel').innerHTML = data.total_travel_km;
       });
 }
-
-
-
 
 document.getElementById('authForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -65,7 +83,8 @@ async function openFlightMenu(icao, name) {
     // haetaan etäisyys
     const response = await fetch(
         `${API_BASE}/get_flight_info?icao=${icao}`);
-    const playerRes = await fetch(`${API_BASE}/authenticate?username=${username}`);
+    const playerRes = await fetch(
+        `${API_BASE}/authenticate?username=${username}`);
 
     const data = await response.json();
     const playerData = await playerRes.json();
@@ -207,6 +226,19 @@ document.getElementById('btn-fly').addEventListener('click', async () => {
       // piilota flight menu
       document.querySelector('.ui-flight-container').style.display = 'none';
 
+      myGlobe.arcsData([
+        {
+          startLat: currentFlightData.start_lat,
+          startLng: currentFlightData.start_lng,
+          endLat: currentFlightData.end_lat,
+          endLng: currentFlightData.end_lng,
+          color: ['#00ff00', '#ff0000'], // Green to Red arc
+        }]).
+          arcColor('color').
+          arcDashLength(0.4).
+          arcDashGap(0.2).
+          arcDashAnimateTime(2000); // Animation speed
+
       if (data.caught) {
         currentFines = data.fines;
         document.getElementById(
@@ -308,11 +340,14 @@ document.getElementById('btn-return-home').
 
           document.querySelector('.main-game-popup').style.display = 'none';
 
+          myGlobe.arcsData([]);
+
           selectedDestination = null;
           currentFlightData = null;
 
           // Nollataan valikko ja näytetään ilmoitus
-          alert(`Lensit takaisin kotiin! Faija toi sinulle töistä ${data.added_cola} colaa!`);
+          alert(
+              `Lensit takaisin kotiin! Faija toi sinulle töistä ${data.added_cola} colaa!`);
         } else {
           alert(`Virhe: ${data.message}`);
         }

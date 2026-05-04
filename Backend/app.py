@@ -168,6 +168,10 @@ def get_flight_info():
             "distance": round(dist, 2),
             "from": currentLocation,
             "to": targetCountry,
+            "start_lat": float(current["latitude_deg"]),
+            "start_lng": float(current["longitude_deg"]),
+            "end_lat": float(target["latitude_deg"]),
+            "end_lng": float(target["longitude_deg"])
         })
 
     except Exception as error:
