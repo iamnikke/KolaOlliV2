@@ -81,8 +81,10 @@ async function openFlightMenu(icao, name) {
     // haetaan etäisyys
     const response = await fetch(
         `${API_BASE}/get_flight_info?icao=${icao}`);
+    const playerRes = await fetch(`${API_BASE}/authenticate?username=${username}`);
 
     const data = await response.json();
+    const playerData = await playerRes.json();
 
     selectedDestination = {
       icao: icao,
@@ -93,6 +95,8 @@ async function openFlightMenu(icao, name) {
     // päivitetään kohdemaa ja etäisyys htmllää
     document.querySelector('#ui-flight-title').innerHTML = name;
     document.querySelector('#ui-flight-distance').innerHTML = data.distance;
+
+    document.querySelector('#ui-cola-in-menu').innerHTML = playerData.coca_cola;
 
     // asetetaan pieni kone valituksi (index 0)
     const firstPlane = document.querySelector('.plane-card[data-index="0"]');
