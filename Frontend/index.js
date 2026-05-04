@@ -17,7 +17,7 @@ const airportLocations = [
 
 // --- GLOBE INITIALIZATION ---
 const myGlobe = Globe()(document.getElementById('globeViz'))
-    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
     .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
     .pointOfView({ lat: 50, lng: 15, altitude: 1.5 }); // Centers camera on Europe
 
