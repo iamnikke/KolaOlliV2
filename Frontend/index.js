@@ -303,8 +303,7 @@ document.getElementById('btn-return-home').
           document.getElementById('ui-success-screen').style.display = 'none';
 
           // Nollataan valikko ja näytetään ilmoitus
-          alert(`Lensit takaisin kotiin! Matka maksoi ${data.cost.toFixed(
-              2)}€. \nFaija toi sinulle töistä ${data.added_cola} colaa!`);
+          alert(`Lensit takaisin kotiin! Faija toi sinulle töistä ${data.added_cola} colaa!`);
         } else {
           alert(`Virhe: ${data.message}`);
         }

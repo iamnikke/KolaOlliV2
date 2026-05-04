@@ -16,9 +16,9 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 DB_CONFIG = {
     "host": "127.0.0.1",
     "port": 3306,
-    "user": "admin",
-    "password": "admin",
-    "database": "kolaolligame",
+    "user": "root",
+    "password": "Aaro22",
+    "database": "cola_game",
     "autocommit": True
 }
 
@@ -166,7 +166,7 @@ def get_flight_info():
         return jsonify({
             "distance": round(dist, 2),
             "from": currentLocation,
-            "to": targetCountry
+            "to": targetCountry,
         })
 
     except Exception as error:
@@ -366,15 +366,9 @@ def return_home():
             (float(home_loc["latitude_deg"]), float(home_loc["longitude_deg"]))
         ).km
 
-        cost = dist * 0.2
-
-        if float(user["money"]) < cost:
-            return jsonify({"success": False, "message": "Ei tarpeeksi rahaa paluulentoon! Peli ohi."}), 400
-
         # Faija tuo uutta colaa 200-500 kpl
         added_cola = random.randint(200, 500)
 
-        new_money = float(user["money"]) - cost
         new_total_dist = float(user["total_travel_km"]) + dist
         new_cola = user["coca_cola"] + added_cola
 
@@ -382,16 +376,14 @@ def return_home():
                  UPDATE user_info
                  SET location        = %s,
                      total_travel_km = %s,
-                     money           = %s,
                      coca_cola       = %s
                  WHERE username = %s
-                 """, (home_port, new_total_dist, new_money, new_cola, username))
+                 """, (home_port, new_total_dist, new_cola, username))
 
         updated_user = get_user_by_username(username)
 
         return jsonify({
             "success": True,
-            "cost": round(cost, 2),
             "added_cola": added_cola,
             "user": clean_user(updated_user)
         })
