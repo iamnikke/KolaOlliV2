@@ -103,6 +103,9 @@ async function openFlightMenu(icao, name) {
     // näytetään valikko
     document.querySelector('.ui-flight-container').style.display = 'block';
 
+    // avataan popup
+    document.querySelector('.main-game-popup').style.display = 'flex';
+
   } catch (error) {
     console.error('Virhe lentovalikkoa avatessa:', error);
     alert('Lentotietojen haku epäonnistui!');

@@ -1,3 +1,91 @@
+
+.main-game-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.main-game-hud {
+    width: 100%;
+    height: 10%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+
+    background-color: rgba(0, 0, 0, 0.5);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 100px;
+
+    z-index: 10;
+}
+
+.main-game-hud .ui-card {
+    background: lightgray;
+    padding: 10px 20px;
+    border-radius: 25px;
+    min-width: 100px;
+    text-align: center;
+}
+
+.ui-card .ui-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: Satoshi, sans-serif;
+    margin: 0;
+}
+
+.ui-card .ui-card-label {
+    font-size: 32px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: Satoshi, sans-serif;
+    margin: 0;
+}
+
+.main-game-ui {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.main-game-ui .ui-select-country-container {
+
+}
+
+.main-game-ui .ui-select-country-container .ui-select-country {
+    padding: 10px 15px;
+    font-family: Satoshi, sans-serif;
+}
+
+.main-game-popup {
+    display: none;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.5);
+    z-index: 11;
+
+    justify-content: center;
+    align-items: center;
+}
+
 .ui-flight-container {
     display: none;
 

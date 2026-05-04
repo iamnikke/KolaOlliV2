@@ -6,37 +6,129 @@
     <title>s</title>
     <script src="index.js" defer></script>
 <body>
-<h1>Hello World!</h1>
-<span id="asd"></span>
 
-<div class="ui-card">
-    <p>massit</p>
-    <span id="ui-money"></span>
-</div>
-<div class="ui-card">
-    <p>colat</p>
-    <span id="ui-cola"></span>
-</div>
-<div class="ui-card">
-    <p>kello</p>
-    <span id="ui-clock"></span>
-</div>
-<div class="ui-card">
-    <p>sijainti</p>
-    <span id="ui-location"></span>
-</div>
+<div class="main-game-container">
 
-<div class="ui-card">
-    <p>kokonaismatka</p>
-    <span id="ui-total-travel"></span>
-</div>
+    <div class="main-game-hud">
+        <div class="ui-card">
+            <p class="ui-card-title">massit</p>
+            <p class="ui-card-label">
+                <span id="ui-money"></span>
+            </p>
+        </div>
+        <div class="ui-card">
+            <p class="ui-card-title">colat</p>
+            <p class="ui-card-label">
+                <span id="ui-cola"></span>
+            </p>
+        </div>
+        <div class="ui-card">
+            <p class="ui-card-title">kello</p>
+            <p class="ui-card-label">
+                <span id="ui-clock"></span>
+            </p>
+        </div>
+        <div class="ui-card">
+            <p class="ui-card-title">sijainti</p>
+            <p class="ui-card-label">
+                <span id="ui-location"></span>
+            </p>
+        </div>
+        <div class="ui-card">
+            <p class="ui-card-title">kokonaismatka</p>
+            <p class="ui-card-label">
+                <span id="ui-total-travel"></span>
+            </p>
+        </div>
+    </div>
+
+    <div class="main-game-ui">
+        <h1>
+            Tervetuloa
+            <span id="asd"></span>
+        </h1>
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+        </p>
+
+        <div class="ui-select-country-container">
+            <button class="ui-select-country" id="EBBR">Bryssel, Belgium</button>
+            <button class="ui-select-country" id="LOWW">Austria</button>
+            <button class="ui-select-country" id="LEMD">Madrid, Espanja</button>
+            <button class="ui-select-country" id="LIRF">Rooma, Italia</button>
+        </div>
+    </div>
+
+    <div class="main-game-popup">
+
+        <div class="ui-flight-container" style="border: solid 1px black">
+
+            <h1 class="ui-flight-title" id="ui-flight-title">Kohdemaa</h1>
+
+            <p>Etäisyys: <span id="ui-flight-distance">0</span> km</p>
+            <p>Hinta (menopaluu): <span id="ui-flight-cost">0</span> €</p>
+            <p>Colan määrä: <span id="ui-cola-in-menu">0</span></p>
+
+            <h3 class="ui-selection-label">Valitse lentokone:</h3>
+
+            <div class="airplane-selector">
+                <div class="plane-card selected" data-index="0" data-capacity="50" onclick="selectPlane(this)">
+                    <span class="plane-name">Pieni lentokone</span>
+                    <span class="plane-speed">Nopeus: 1000 km/h</span>
+                    <span class="plane-capacity">Kapasiteetti: 50 tölkkiä</span>
+                </div>
+
+                <div class="plane-card" data-index="1" data-capacity="100" onclick="selectPlane(this)">
+                    <span class="plane-name">Välimalli</span>
+                    <span class="plane-speed">Nopeus: 1500 km/h</span>
+                    <span class="plane-capacity">Kapasiteetti: 100 tölkkiä</span>
+                </div>
+
+                <div class="plane-card" data-index="2" data-capacity="300" onclick="selectPlane(this)">
+                    <span class="plane-name">Iso lentokone</span>
+                    <span class="plane-speed">Nopeus: 2000 km/h</span>
+                    <span class="plane-capacity">Kapasiteetti: 300 tölkkiä</span>
+                </div>
+            </div>
+
+            <div class="cargo-selector">
+                <h3>Valitse Coca-Cola määrä:</h3>
+                <div class="quantity-controls">
+                    <button type="button" onclick="changeQuantity(-1)">-</button>
+                    <input type="number" id="ui-cola-quantity" value="0" min="0" oninput="validateQuantity()">
+                    <button type="button" onclick="changeQuantity(1)">+</button>
+                </div>
+                <p><small>Kapasiteetti jäljellä: <span id="ui-capacity-left">0</span> tölkkiä</small></p>
+
+                <button id="btn-fly">Lessgo!</button>
+
+            </div>
 
 
-<button class="ui-select-country" id="EBBR">Bryssel, Belgium</button>
-<button class="ui-select-country" id="LOWW">Austria</button>
-<button class="ui-select-country" id="LEMD">Madrid, Espanja</button>
-<button class="ui-select-country" id="LIRF">Rooma, Italia</button>
+            <input type="hidden" id="selected-plane-index" value="0">
 
+        </div>
+
+        <div id="ui-bribe-screen">
+            <h2>TULLI ISKI!</h2>
+            <p id="bribe-fine-text"></p>
+            <button id="btn-pay-fine">Maksa sakko</button>
+            <button id="btn-attempt-bribe">Yritä lahjoa (20% sakosta)</button>
+        </div>
+
+        <div id="ui-success-screen">
+            <h2 id="success-message">Saavuit perille!</h2>
+            <p id="success-sales-message"></p>
+            <img id="country-image" src="" alt="Destination">
+            <br>
+            <button id="btn-return-home">
+                Palaa kotiin (EFHK) hakemaan lisää Colaa
+            </button>
+        </div>
+
+    </div>
+
+</div> <!-- END OF MAIN GAME CONTAINER -->
 
 <!--
 
@@ -63,70 +155,7 @@
 </form>
 
 
-<div class="ui-flight-container" style="border: solid 1px black">
 
-    <h1 class="ui-flight-title" id="ui-flight-title">Kohdemaa</h1>
-
-    <p>Etäisyys: <span id="ui-flight-distance">0</span> km</p>
-    <p>Hinta (menopaluu): <span id="ui-flight-cost">0</span> €</p>
-    <p>Colan määrä: <span id="ui-cola-in-menu">0</span></p>
-
-    <h3 class="ui-selection-label">Valitse lentokone:</h3>
-
-    <div class="airplane-selector">
-        <div class="plane-card selected" data-index="0" data-capacity="50" onclick="selectPlane(this)">
-            <span class="plane-name">Pieni lentokone</span>
-            <span class="plane-speed">Nopeus: 1000 km/h</span>
-            <span class="plane-capacity">Kapasiteetti: 50 tölkkiä</span>
-        </div>
-
-        <div class="plane-card" data-index="1" data-capacity="100" onclick="selectPlane(this)">
-            <span class="plane-name">Välimalli</span>
-            <span class="plane-speed">Nopeus: 1500 km/h</span>
-            <span class="plane-capacity">Kapasiteetti: 100 tölkkiä</span>
-        </div>
-
-        <div class="plane-card" data-index="2" data-capacity="300" onclick="selectPlane(this)">
-            <span class="plane-name">Iso lentokone</span>
-            <span class="plane-speed">Nopeus: 2000 km/h</span>
-            <span class="plane-capacity">Kapasiteetti: 300 tölkkiä</span>
-        </div>
-    </div>
-
-    <div class="cargo-selector">
-        <h3>Valitse Coca-Cola määrä:</h3>
-        <div class="quantity-controls">
-            <button type="button" onclick="changeQuantity(-1)">-</button>
-            <input type="number" id="ui-cola-quantity" value="0" min="0" oninput="validateQuantity()">
-            <button type="button" onclick="changeQuantity(1)">+</button>
-        </div>
-        <p><small>Kapasiteetti jäljellä: <span id="ui-capacity-left">0</span> tölkkiä</small></p>
-
-        <button id="btn-fly">Lessgo!</button>
-
-    </div>
-
-
-    <input type="hidden" id="selected-plane-index" value="0">
-
-</div>
-
-<div id="ui-bribe-screen">
-    <h2>TULLI ISKI!</h2>
-    <p id="bribe-fine-text"></p>
-    <button id="btn-pay-fine">Maksa sakko</button>
-    <button id="btn-attempt-bribe">Yritä lahjoa (20% sakosta)</button>
-</div>
-
-<div id="ui-success-screen">
-    <h2 id="success-message">Saavuit perille!</h2>
-    <p id="success-sales-message"></p>
-    <img id="country-image" src="" alt="Destination">
-    <br>
-    <button id="btn-return-home">
-        Palaa kotiin (EFHK) hakemaan lisää Colaa
-    </button>
-</div>
 
 <script>
 </script>
