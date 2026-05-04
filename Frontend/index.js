@@ -11,7 +11,7 @@ const username = getUsernameFromURL();
 
 // jos ei ole pelaaja formia niin piilota hudi
 if (!username) {
-  document.querySelectorAll('.ui-card').
+  document.querySelectorAll('.main-game-container').
       forEach(el => el.style.display = 'none');
 } else {
   // piilota formi
