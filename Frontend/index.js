@@ -30,24 +30,8 @@ if (!username) {
       });
 }
 
-document.querySelectorAll('.ui-select-country').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const icao = e.currentTarget.id;
 
-    fetch(`${API_BASE}/get_flight_info?icao=${icao}`).
-        then(res => res.json()).
-        then(data => {
-          console.log(data);
 
-          document.getElementById('ui-flight-title').innerHTML = data.from +
-              '->' + data.to;
-          document.getElementById(
-              'ui-flight-distance').innerHTML = data.distance;
-
-        });
-  });
-
-});
 
 document.getElementById('authForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -180,8 +164,7 @@ document.querySelectorAll('.ui-select-country').forEach(btn => {
       const data = await response.json();
 
       currentFlightData = data;
-      document.getElementById(
-          'ui-flight-title').textContent = `${data.from} -> ${data.to}`;
+
       document.getElementById('ui-flight-distance').textContent = data.distance;
       document.getElementById('btn-fly').style.display = 'block';
     } catch (err) {
