@@ -40,22 +40,22 @@ Käytännössä kehitetään screeneittäin peliä niin, että jaetaan tasaisest
 ## Screen 2: Perusnäkymä
 * Kohdemaan valinta napit (**Nikke**)
 * Perus kelluva tilasto hud (**Nikke**)
-* Kattavampi tilastonäkymä ()
+* Kattavampi tilastonäkymä (**Matti**)
 
 ## Screen 3: Matkan määrittely pop-up
 * Dynaaminen title riippuen valitusta kohdemaasta ()
 * Etäisyyden laskenta kotoa valittuun kohdemaahan (**Nikke**)
 * Riittävästi rahaa validointi ()
-* Matkustusmuodon valitseminen ()
+* Matkustusmuodon valitseminen (**Matti**)
   * Lentokone vaihtoehtojen hakeminen
   * Hinnan laskenta etäisyyteen perustuen
   * Validointi: Jos rahat ei riitä, niin valitsin disabled
-* Coca-colan määrä valitsin elementti ()
+* Coca-colan määrä valitsin elementti (**Matti, Aaro**)
   * Minimi 0, maksimi käyttäjän saldo
 
 ## Screen 4: Matka käynnissä
 * S3:sta passatun kohdemaan mukaan välinäkymässä käytetty materiaali (kuva, video, musiikki?) renderöinti fronttiin ()
-* Back-end logiikka ()
+* Back-end logiikka (**Aaro**)
   * Vähennä rahat ja colat tietokannasta
   * Logiikka kiinnijäämiselle
     * Jos jää kiinni, niin siirtymä S5
@@ -64,12 +64,12 @@ Käytännössä kehitetään screeneittäin peliä niin, että jaetaan tasaisest
     * Siirtymä S6
 
 ## Screen 5: Lahjonta / kiinnijääminen
-* Logiikka sakon määrälle
-* Logiikka lahjonnan summalle
-* Frontissa: maksa sakko tai yritä lahjoa
+* Logiikka sakon määrälle (**Aaro**)
+* Logiikka lahjonnan summalle (**Aaro**)
+* Frontissa: maksa sakko tai yritä lahjoa (**Aaro**)
   * Näytä summat napeissa 
 * Pieni viive rakentamaan jännitystä lahjonnan tuloksesta
-* Logiikka lahjonnan onnistumiselle
+* Logiikka lahjonnan onnistumiselle (**Aaro**)
   * Lahjonta epäonnistuu
     * Päivitä statsit
     * Siirtymä S7: Game over
@@ -82,10 +82,10 @@ Käytännössä kehitetään screeneittäin peliä niin, että jaetaan tasaisest
 
 ## Screen 6: Kohdemaassa
 * Paikallinen tunnelma
-  * Kuva/video tausta
+  * Kuva/video tausta (**Aaro**)
   * Paikallinen radio soi
   * Mahdollisuus upottaa easter eggejä
-* Vain yksi valinta: Palaa kotiin
+* Vain yksi valinta: Palaa kotiin (**Aaro**)
   * Logiikka sille
     * Siirrä pelaaja
   * Päivitä statsit
