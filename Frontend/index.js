@@ -77,6 +77,9 @@ let selectedDestination = null;
 // funktio joka avaa valikon klikatessa kohdemaata
 async function openFlightMenu(icao, name) {
     try {
+        // piilotetaan vanhat ruudut
+        document.getElementById('ui-success-screen').style.display = 'none';
+        document.getElementById('ui-bribe-screen').style.display = 'none';
         // haetaan etäisyys
         const response = await fetch(
             `${API_BASE}/get_flight_info?icao=${icao}`);
@@ -349,6 +352,13 @@ document.getElementById('btn-return-home').addEventListener('click', async () =>
 function mainPopup() {
     // piilotetaan koko popup-tausta
     document.querySelector('.main-game-popup').style.display = 'none';
+
+    document.querySelector('.ui-flight-container').style.display = 'none';
+    document.querySelector('.ui-success-screen').style.display = 'none';
+    document.querySelector('.ui-bribe-screen').style.display = 'none';
+
+    selectedDestination = null;
+    currentFlightData = null;
 
     console.log("Valikko suljettu");
 }
