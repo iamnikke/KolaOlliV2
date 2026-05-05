@@ -1,25 +1,55 @@
 'use strict';
 
+import Globe from 'https://esm.sh/globe.gl';
+import * as THREE from 'https://esm.sh/three';
+
 const airportLocations = [
-    {icao: 'EFHK', name: 'Helsinki (Home)', lat: 60.3172, lng: 24.9633},
+    {icao: 'EFHK', name: 'Finland (Home)', lat: 60.3172, lng: 24.9633},
     {icao: 'LOWW', name: 'Austria', lat: 48.1103, lng: 16.5697},
-    {icao: 'EBBR', name: 'Bryssel, Belgium', lat: 50.9014, lng: 4.4844},
-    {icao: 'LEMD', name: 'Madrid, Espanja', lat: 40.4719, lng: -3.5626},
-    {icao: 'LIRF', name: 'Rooma, Italia', lat: 41.8003, lng: 12.2389},
-    {icao: 'ELLX', name: 'Luxemburg', lat: 49.6266, lng: 6.2115},
-    {icao: 'EPWA', name: 'Varsova, Puola', lat: 52.1657, lng: 20.9671},
-    {icao: 'LFPG', name: 'Pariisi, Ranska', lat: 49.0097, lng: 2.5479},
-    {icao: 'EKCH', name: 'Kööpenhamina, Tanska', lat: 55.6180, lng: 12.6560},
-    {icao: 'LGAV', name: 'Ateena, Kreikka', lat: 37.9364, lng: 23.9445},
-    {icao: 'UMMS', name: 'Minsk, Valko-Venäjä', lat: 53.8825, lng: 28.0307},
-    {icao: 'EETN', name: 'Tallinna, Viro', lat: 59.4133, lng: 24.8328},
+    {icao: 'EBBR', name: 'Belgium', lat: 50.9014, lng: 4.4844},
+    {icao: 'LEMD', name: 'Spain', lat: 40.4719, lng: -3.5626},
+    {icao: 'LIRF', name: 'Italy', lat: 41.8003, lng: 12.2389},
+    {icao: 'EPWA', name: 'Poland', lat: 52.1657, lng: 20.9671},
+    {icao: 'LFPG', name: 'France', lat: 49.0097, lng: 2.5479},
+    {icao: 'EKCH', name: 'Tanska', lat: 55.6180, lng: 12.6560},
+    {icao: 'LGAV', name: 'Greece', lat: 37.9364, lng: 23.9445},
+    {icao: 'UMMS', name: 'Belarus', lat: 53.8825, lng: 28.0307},
 ];
 
 // --- GLOBE INITIALIZATION ---
 const myGlobe = Globe()(document.getElementById('globeViz'))
     .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
     .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-    .pointOfView({lat: 50, lng: 15, altitude: 1.5}); // Centers camera on Europe
+    .pointOfView({lat: 45, lng: 20, altitude: 1.2})// Centers camera on Europe
+    .labelsData(airportLocations)
+    .labelLat('lat')
+    .labelLng('lng')
+    .labelText('name')
+    .labelSize(1)
+    .labelDotRadius(0.5)
+    .labelColor(() => 'lightblue') // You can match this to your UI theme
+    .labelResolution(2)
+
+    // Change cursor to pointer when hovering over a destination
+    .onLabelHover(label => {
+        document.getElementById('globeViz').style.cursor = label ? 'pointer' : 'default';
+    })
+
+    // Trigger your existing flight menu when clicked
+    .onLabelClick((label) => {
+        openFlightMenu(label.icao, label.name);
+    });
+
+const globeMaterial = myGlobe.globeMaterial();
+    globeMaterial.bumpScale = 10;
+    new THREE.TextureLoader().load('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-water.png', texture => {
+      globeMaterial.specularMap = texture;
+      globeMaterial.specular = new THREE.Color('gray');
+      globeMaterial.shininess = 100;
+    });
+
+    const directionalLight = myGlobe.lights().find(light => light.type === 'DirectionalLight');
+    directionalLight && directionalLight.position.set(5, 5, 5);
 
 const API_BASE = 'http://localhost:5050/api';
 
@@ -87,6 +117,7 @@ async function openFlightMenu(icao, name) {
             `${API_BASE}/authenticate?username=${username}`);
 
         const data = await response.json();
+        currentFlightData = data;
         const playerData = await playerRes.json();
 
         selectedDestination = {
@@ -363,3 +394,5 @@ function mainPopup() {
     console.log("Valikko suljettu");
 }
 
+window.selectPlane = selectPlane;
+window.mainPopup = mainPopup;

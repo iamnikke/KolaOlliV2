@@ -10,8 +10,8 @@ app = Flask(__name__)
 
 # headers: salli liikenne localhostista
 
-# CORS(app, origins=["http://localhost:3000"])
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, origins=["http://localhost:3000"])
+#CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # db asetukset
 DB_CONFIG = {
