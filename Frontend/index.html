@@ -65,70 +65,70 @@
     <div class="main-game-popup">
         <div class="main-game-popup-content">
 
-        <div class="ui-flight-container" style="width: 100%; height: 100%; background-color: yellow;">
+            <div class="ui-flight-container">
 
-            <h1 class="ui-flight-title" id="ui-flight-title">Kohdemaa</h1>
+                <h1 class="ui-flight-title" id="ui-flight-title">Kohdemaa</h1>
 
-            <p>Etäisyys: <span id="ui-flight-distance">0</span> km</p>
-            <p>Hinta (menopaluu): <span id="ui-flight-cost">0</span> €</p>
-            <p>Colan määrä: <span id="ui-cola-in-menu">0</span></p>
+                <p class="info-row">Etäisyys: <span id="ui-flight-distance">0</span> km</p>
+                <p class="info-row">Hinta (menopaluu): <span id="ui-flight-cost">0</span> €</p>
+                <p class="info-row">Colan määrä: <span id="ui-cola-in-menu">0</span></p>
 
-            <h3 class="ui-selection-label">Valitse lentokone:</h3>
+                <h3 class="ui-selection-label">Valitse lentokone:</h3>
 
-            <div class="airplane-selector">
-                <div class="plane-card selected" data-index="0" data-capacity="50" onclick="selectPlane(this)">
-                    <span class="plane-name">Pieni lentokone</span>
-                    <span class="plane-speed">Nopeus: 1000 km/h</span>
-                    <span class="plane-capacity">Kapasiteetti: 50 tölkkiä</span>
+                <div class="airplane-selector">
+                    <div class="plane-card selected" data-index="0" data-capacity="50" onclick="selectPlane(this)">
+                        <span class="plane-name">Pieni lentokone</span>
+                        <span class="plane-speed">Nopeus: 1000 km/h</span>
+                        <span class="plane-capacity">Kapasiteetti: 50 tölkkiä</span>
+                    </div>
+
+                    <div class="plane-card" data-index="1" data-capacity="100" onclick="selectPlane(this)">
+                        <span class="plane-name">Välimalli</span>
+                        <span class="plane-speed">Nopeus: 1500 km/h</span>
+                        <span class="plane-capacity">Kapasiteetti: 100 tölkkiä</span>
+                    </div>
+
+                    <div class="plane-card" data-index="2" data-capacity="300" onclick="selectPlane(this)">
+                        <span class="plane-name">Iso lentokone</span>
+                        <span class="plane-speed">Nopeus: 2000 km/h</span>
+                        <span class="plane-capacity">Kapasiteetti: 300 tölkkiä</span>
+                    </div>
                 </div>
 
-                <div class="plane-card" data-index="1" data-capacity="100" onclick="selectPlane(this)">
-                    <span class="plane-name">Välimalli</span>
-                    <span class="plane-speed">Nopeus: 1500 km/h</span>
-                    <span class="plane-capacity">Kapasiteetti: 100 tölkkiä</span>
+                <div class="cargo-selector">
+                    <h3 class="info-row">Valitse Coca-Cola määrä:</h3>
+                    <div class="quantity-controls">
+                        <button type="button" id="minus-btn">-</button>
+                        <input type="number" id="ui-cola-quantity" value="0" min="0">
+                        <button type="button" id="plus-btn">+</button>
+                    </div>
+                    <!--<p class="info-row"><small>Kapasiteetti jäljellä: <span id="ui-capacity-left">0</span> tölkkiä</small></p> -->
+
+                    <button id="btn-fly">Lessgo!</button>
+
                 </div>
 
-                <div class="plane-card" data-index="2" data-capacity="300" onclick="selectPlane(this)">
-                    <span class="plane-name">Iso lentokone</span>
-                    <span class="plane-speed">Nopeus: 2000 km/h</span>
-                    <span class="plane-capacity">Kapasiteetti: 300 tölkkiä</span>
-                </div>
+
+                <input type="hidden" id="selected-plane-index" value="0">
+
             </div>
 
-            <div class="cargo-selector">
-                <h3>Valitse Coca-Cola määrä:</h3>
-                <div class="quantity-controls">
-                    <button type="button" onclick="changeQuantity(-1)">-</button>
-                    <input type="number" id="ui-cola-quantity" value="0" min="0">
-                    <button type="button" onclick="changeQuantity(1)">+</button>
-                </div>
-                <p><small>Kapasiteetti jäljellä: <span id="ui-capacity-left">0</span> tölkkiä</small></p>
-
-                <button id="btn-fly">Lessgo!</button>
-
+            <div id="ui-bribe-screen">
+                <h2>TULLI ISKI!</h2>
+                <p id="bribe-fine-text"></p>
+                <button id="btn-pay-fine">Maksa sakko</button>
+                <button id="btn-attempt-bribe">Yritä lahjoa (20% sakosta)</button>
             </div>
 
-
-            <input type="hidden" id="selected-plane-index" value="0">
-
-        </div>
-
-        <div id="ui-bribe-screen">
-            <h2>TULLI ISKI!</h2>
-            <p id="bribe-fine-text"></p>
-            <button id="btn-pay-fine">Maksa sakko</button>
-            <button id="btn-attempt-bribe">Yritä lahjoa (20% sakosta)</button>
-        </div>
-
-        <div id="ui-success-screen">
-            <h2 id="success-message">Saavuit perille!</h2>
-            <p id="success-sales-message"></p>
-            <img id="country-image" src="" alt="Destination">
-            <br>
-            <button id="btn-return-home">
-                Palaa kotiin (EFHK) hakemaan lisää Colaa
-            </button>
-        </div>
+            <div id="ui-success-screen">
+                <h2 id="success-message">Saavuit perille!</h2>
+                <p id="success-sales-message"></p>
+                <img id="country-image" src="" alt="Destination">
+                <br>
+                <button id="btn-return-home">
+                    Palaa kotiin (EFHK) hakemaan lisää Colaa
+                </button>
+            </div>
 
         </div> <!-- END OF POPUP CONTAINER -->
     </div> <!-- END OF POPUP OVERLAY -->
@@ -159,8 +159,6 @@
         <button type="submit">Submit</button>
     </form>
 </div>
-
-
 
 
 <script>
