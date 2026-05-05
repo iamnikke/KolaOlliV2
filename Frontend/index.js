@@ -27,7 +27,7 @@ const myGlobe = Globe()(document.getElementById('globeViz'))
     .labelText('name')
     .labelSize(1)
     .labelDotRadius(0.5)
-    .labelColor(() => 'lightblue') // You can match this to your UI theme
+    .labelColor(() => 'red') // You can match this to your UI theme
     .labelResolution(2)
 
     // Change cursor to pointer when hovering over a destination
@@ -49,7 +49,7 @@ const globeMaterial = myGlobe.globeMaterial();
     });
 
     const directionalLight = myGlobe.lights().find(light => light.type === 'DirectionalLight');
-    directionalLight && directionalLight.position.set(5, 5, 5);
+    directionalLight && directionalLight.position.set(20, 5, 5);
 
 const API_BASE = 'http://localhost:5050/api';
 
