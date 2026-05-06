@@ -55,10 +55,25 @@ const globeMaterial = myGlobe.globeMaterial();
 const API_BASE = 'http://localhost:5050/api';
 
 
-function playSound(file) {
+let bgMusic = null;
+
+function playSound(file, loop = false) {
     const audio = new Audio(`sfx/${file}.mp3`);
-    audio.loop = false;
-    audio.play();
+    audio.loop = loop;
+    audio.volume = 0.5;
+
+    audio.play().catch(error => {
+        console.error('Audio error:', error);
+    });
+
+    return audio;
+}
+
+function stopSound(audio) {
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
 }
 
 
@@ -89,7 +104,7 @@ if (!username) {
     playSound('intropuhe');
     document.querySelectorAll('.main-game-container').forEach(el => el.style.display = 'none');
 } else {
-    playSound('bgmusic');
+    bgMusic = playSound('bgmusic', true);
 
     // piilota formi
     document.getElementById('authForm').style.display = 'none';
@@ -133,6 +148,10 @@ let selectedDestination = null;
 
 // funktio joka avaa valikon klikatessa kohdemaata
 async function openFlightMenu(icao, name) {
+
+    stopSound(bgMusic);
+    bgMusic = null;
+
     try {
         // piilotetaan vanhat ruudut
         document.getElementById('ui-success-screen').style.display = 'none';
