@@ -33,10 +33,12 @@ body {
     z-index: 10;
 }
 
+#btn-logout .ui-card-title {
+    color: red;
+}
+
 .main-game-hud .ui-card {
-    background: #101010;
     padding: 10px 20px;
-    border-radius: 25px;
     min-width: 100px;
     text-align: center;
 }
