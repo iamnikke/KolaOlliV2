@@ -38,6 +38,7 @@ const myGlobe = Globe()(document.getElementById('globeViz'))
     // Trigger your existing flight menu when clicked
     .onLabelClick((label) => {
         openFlightMenu(label.icao, label.name);
+        playSound('whoosh');
     });
 
 const globeMaterial = myGlobe.globeMaterial();
@@ -52,6 +53,15 @@ const globeMaterial = myGlobe.globeMaterial();
     directionalLight && directionalLight.position.set(20, 5, 5);
 
 const API_BASE = 'http://localhost:5050/api';
+
+
+function playSound(file) {
+    const audio = new Audio(`sfx/${file}.mp3`);
+    audio.loop = false;
+    audio.play();
+}
+
+
 
 function getUsernameFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -75,8 +85,12 @@ function logout() {
 
 // jos ei ole pelaaja formia niin piilota hudi
 if (!username) {
+    playSound('explosion');
+    playSound('intropuhe');
     document.querySelectorAll('.main-game-container').forEach(el => el.style.display = 'none');
 } else {
+    playSound('bgmusic');
+
     // piilota formi
     document.getElementById('authForm').style.display = 'none';
 
@@ -246,6 +260,8 @@ document.getElementById('btn-fly').addEventListener('click', async () => {
     const colaLoad = document.getElementById('ui-cola-quantity').value;
     const selectedPlane = document.querySelector('.plane-card.selected');
     const planeCapacity = selectedPlane.getAttribute('data-capacity');
+
+    playSound('plane');
 
     try {
         const response = await fetch(`${API_BASE}/move_player`, {
