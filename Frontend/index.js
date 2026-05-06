@@ -20,7 +20,7 @@ const airportLocations = [
 const myGlobe = Globe()(document.getElementById('globeViz')).
     globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg').
     bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png').
-    pointOfView({lat: 45, lng: 20, altitude: 1.2})// Centers camera on Europe
+    pointOfView({lat: 45, lng: 20, altitude: 1.4})// Centers camera on Europe
     .labelsData(airportLocations).
     labelLat('lat').
     labelLng('lng').
