@@ -8,7 +8,7 @@ const icaoToCountry = {
     'LFPG': 'FR',
     'EKCH': 'DK',
     'LGAV': 'GR',
-    'UMMS': 'BY'
+    'EYVI': 'LT'
 };
 
 async function playLocalRadio(icao) {
@@ -16,6 +16,10 @@ async function playLocalRadio(icao) {
     if (!countryCode) return;
 
     let player = document.getElementById('radio-player');
+
+    player.pause();
+    player.src = "";
+    player.load();
 
     try {
         let response = await fetch('https://all.api.radio-browser.info/json/stations/bycountrycodeexact/' + countryCode + '?limit=1&order=clickcount&reverse=true');

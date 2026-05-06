@@ -11,9 +11,9 @@ const airportLocations = [
   {icao: 'LIRF', name: 'Italy', lat: 41.8003, lng: 12.2389},
   {icao: 'EPWA', name: 'Poland', lat: 52.1657, lng: 20.9671},
   {icao: 'LFPG', name: 'France', lat: 49.0097, lng: 2.5479},
-  {icao: 'EKCH', name: 'Tanska', lat: 55.6180, lng: 12.6560},
+  {icao: 'EKCH', name: 'Denmark', lat: 55.6180, lng: 12.6560},
   {icao: 'LGAV', name: 'Greece', lat: 37.9364, lng: 23.9445},
-  {icao: 'UMMS', name: 'Belarus', lat: 53.8825, lng: 28.0307},
+  {icao: 'EYVI', name: 'Lithuania', lat: 54.6354, lng: 25.2859},
 ];
 
 // --- GLOBE INITIALIZATION ---
@@ -145,7 +145,7 @@ const countryImages = {
   'LFPG': 'images/paris.jpg',
   'EKCH': 'images/copenhagen.jpg',
   'LGAV': 'images/athens.jpg',
-  'UMMS': 'images/minsk.jpg',
+  'EYVI': 'images/Lithuania.jpg',
   'EETN': 'images/tallinn.jpg',
 };
 
@@ -156,6 +156,9 @@ async function openFlightMenu(icao, name) {
 
   stopSound(bgMusic);
   bgMusic = null;
+
+  stopRadio()
+  playLocalRadio(icao);
 
   try {
     // piilotetaan vanhat ruudut
@@ -379,7 +382,6 @@ async function submitBribeChoice(choice) {
 function showGameOverScreen(message) {
 
   const destIcao = currentFlightData.to;
-  playLocalRadio(destIcao);
   const screenElement = document.getElementById('ui-gameover-screen');
 
   // Näytä tienattu summa
@@ -396,7 +398,6 @@ function showGameOverScreen(message) {
 // Apufunktio onnistumisruudun näyttämiseen
 function showSuccessScreen() {
     const destIcao = currentFlightData.to;
-    playLocalRadio(destIcao);
 
     const screenElement = document.getElementById('ui-success-screen');
     document.getElementById('country-image').src = countryImages[destIcao] || 'images/default_airport.jpg';
@@ -416,7 +417,11 @@ function showSuccessScreen() {
 // Kotiinpaluu napin logiikka
 document.getElementById('btn-return-home').
     addEventListener('click', async () => {
-      stopRadio();
+
+      stopRadio()
+      stopSound(bgMusic);
+      bgMusic = playSound('bgmusic', true);
+
       try {
         const response = await fetch(`${API_BASE}/return_home`, {
           method: 'POST',
