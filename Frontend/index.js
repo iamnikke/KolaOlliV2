@@ -364,11 +364,29 @@ async function submitBribeChoice(choice) {
             // Näytetään onnistumisruutu sakkojen/lahjonnan selvittelyn jälkeen
             showSuccessScreen();
         } else {
-            alert(`Virhe: ${data.message}`);
+            showGameOverScreen(data.message);
+            //alert(`Virhe: ${data.message}`);
         }
     } catch (err) {
         console.error('Bribe request failed:', err);
     }
+}
+
+function showGameOverScreen(message) {
+
+    const destIcao = currentFlightData.to;
+    playLocalRadio(destIcao);
+    const screenElement = document.getElementById('ui-gameover-screen');
+
+    // Näytä tienattu summa
+        document.getElementById(
+            'gameover-message').textContent = message;
+
+    document.getElementById('btn-restart-game').onclick = () => {
+        logout();
+    }
+
+    screenElement.style.display = 'block';
 }
 
 // Apufunktio onnistumisruudun näyttämiseen

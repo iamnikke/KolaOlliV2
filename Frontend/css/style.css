@@ -29,7 +29,7 @@ body {
     align-items: center;
     justify-content: center;
     flex-direction: row;
-    gap: 100px;
+    gap: 10px;
     z-index: 10;
 }
 
@@ -145,6 +145,16 @@ body {
     padding: 20px;
     margin-top: 20px;
 }
+
+#ui-gameover-screen {
+    display: none;
+    text-align: center;
+    border: 2px solid gold;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+
 
 #success-sales-message {
     font-size: 1.2rem;
