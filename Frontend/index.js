@@ -60,6 +60,19 @@ function getUsernameFromURL() {
 
 const username = getUsernameFromURL();
 
+document.getElementById('btn-logout').addEventListener('click', logout);
+
+// LOG OUT FUNKTIO
+function logout() {
+    const url = new URL(window.location.href);
+
+    url.searchParams.delete('username');
+
+    window.history.replaceState({}, '', url.pathname);
+
+    window.location.reload();
+}
+
 // jos ei ole pelaaja formia niin piilota hudi
 if (!username) {
     document.querySelectorAll('.main-game-container').forEach(el => el.style.display = 'none');

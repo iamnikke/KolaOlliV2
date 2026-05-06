@@ -34,7 +34,7 @@ body {
 }
 
 .main-game-hud .ui-card {
-    background: lightgray;
+    background: #101010;
     padding: 10px 20px;
     border-radius: 25px;
     min-width: 100px;
@@ -47,6 +47,7 @@ body {
     text-transform: uppercase;
     font-family: Satoshi, sans-serif;
     margin: 0;
+    color: #eee;
 }
 
 .ui-card .ui-card-label {
@@ -55,6 +56,7 @@ body {
     text-transform: uppercase;
     font-family: Satoshi, sans-serif;
     margin: 0;
+    color: #fff;
 }
 
 .main-game-ui {

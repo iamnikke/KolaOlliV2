@@ -17,9 +17,9 @@ CORS(app, origins=["http://localhost:3000"])
 DB_CONFIG = {
     "host": "127.0.0.1",
     "port": 3306,
-    "user": "root",
-    "password": "Aaro22",
-    "database": "cola_game",
+    "user": "admin",
+    "password": "admin",
+    "database": "kolaolligame",
     "autocommit": True
 }
 
@@ -360,6 +360,11 @@ def handle_bribe():
     if new_money < 0:
         game_over = True
         msg += " Rahasi loppuivat – peli ohi!"
+        # Poista käyttäjän tiedot
+        query_db(
+            "DELETE FROM user_info WHERE username = %s",
+            (username,)
+        )
 
     return jsonify({
         "success": True,
