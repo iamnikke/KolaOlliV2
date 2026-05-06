@@ -42,15 +42,15 @@ const myGlobe = Globe()(document.getElementById('globeViz'))
     });
 
 const globeMaterial = myGlobe.globeMaterial();
-    globeMaterial.bumpScale = 10;
-    new THREE.TextureLoader().load('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-water.png', texture => {
-      globeMaterial.specularMap = texture;
-      globeMaterial.specular = new THREE.Color('gray');
-      globeMaterial.shininess = 100;
-    });
+globeMaterial.bumpScale = 10;
+new THREE.TextureLoader().load('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-water.png', texture => {
+    globeMaterial.specularMap = texture;
+    globeMaterial.specular = new THREE.Color('gray');
+    globeMaterial.shininess = 100;
+});
 
-    const directionalLight = myGlobe.lights().find(light => light.type === 'DirectionalLight');
-    directionalLight && directionalLight.position.set(20, 5, 5);
+const directionalLight = myGlobe.lights().find(light => light.type === 'DirectionalLight');
+directionalLight && directionalLight.position.set(20, 5, 5);
 
 const API_BASE = 'http://localhost:5050/api';
 
@@ -373,7 +373,9 @@ async function submitBribeChoice(choice) {
 
 // Apufunktio onnistumisruudun näyttämiseen
 function showSuccessScreen() {
+
     const destIcao = currentFlightData.to;
+    playLocalRadio(destIcao);
     const screenElement = document.getElementById('ui-success-screen');
 
     document.getElementById('country-image').src = countryImages[destIcao] ||
@@ -396,6 +398,7 @@ function showSuccessScreen() {
 
 // Kotiinpaluu napin logiikka
 document.getElementById('btn-return-home').addEventListener('click', async () => {
+    stopRadio()
     try {
         const response = await fetch(`${API_BASE}/return_home`, {
             method: 'POST',
@@ -444,3 +447,4 @@ function mainPopup() {
 
 window.selectPlane = selectPlane;
 window.mainPopup = mainPopup;
+
