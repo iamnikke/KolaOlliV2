@@ -91,9 +91,7 @@
                 <div class="cargo-selector">
                     <h3 class="info-row">Valitse Coca-Cola määrä:</h3>
                     <div class="quantity-controls">
-                        <button type="button" id="minus-btn">-</button>
                         <input type="number" id="ui-cola-quantity" value="0" min="0">
-                        <button type="button" id="plus-btn">+</button>
                     </div>
                     <!--<p class="info-row"><small>Kapasiteetti jäljellä: <span id="ui-capacity-left">0</span> tölkkiä</small></p> -->
 
@@ -157,12 +155,15 @@
 
     -->
 <div class="main-game-login-screen">
-    <form id="authForm">
-        <input type="text" id="username" name="username" placeholder="Username"/>
-        <button type="submit">Submit</button>
-    </form>
-</div>
+    <div class="login-card-container">
+        <h1 class="modern-login-title">Login</h1>
 
+        <form id="authForm">
+            <input type="text" id="username" name="username" placeholder="Username" required />
+            <button type="submit">Go!</button>
+        </form>
+    </div>
+</div>
 
 <script>
 </script>

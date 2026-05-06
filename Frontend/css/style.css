@@ -1,6 +1,6 @@
 body {
     overflow: hidden;
-    font-family: 'Consolas', monospace;
+    font-family: Satoshi, sans-serif;
 }
 .main-game-container {
     width: 100%;
@@ -141,7 +141,7 @@ body {
 #ui-success-screen {
     display: none;
     text-align: center;
-    border: 2px solid gold;
+    border: 2px solid #5376e1; /* change this color to see the size of the element*/
     padding: 20px;
     margin-top: 20px;
 }
@@ -149,7 +149,7 @@ body {
 #ui-gameover-screen {
     display: none;
     text-align: center;
-    border: 2px solid gold;
+    border: 2px solid #5376e1; /* change this color to see the size of the element*/
     padding: 20px;
     margin-top: 20px;
 }
@@ -159,7 +159,7 @@ body {
 #success-sales-message {
     font-size: 1.2rem;
     font-weight: bold;
-    color: green;
+    color: limegreen;
 }
 
 #country-image {
@@ -288,7 +288,7 @@ ui-selection-label {
     box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
     padding: 15px 40px;
     border-radius: 50px;
-    font-family: 'Consolas', monospace;
+    font-family: Satoshi, sans-serif;
     font-size: 1.2rem;
     font-weight: bold;
     text-transform: uppercase;
@@ -322,4 +322,107 @@ ui-selection-label {
 .close-btn:hover {
     color: #ff4d4d;
     transform: scale(1.2);
+}
+
+.main-game-login-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    z-index: 100;
+}
+
+.login-card-container {
+    background-color: rgb(26 26 26 / 0.95);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 30px 10px mediumturquoise;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modern-login-title {
+    color: mediumturquoise;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    font-family: Satoshi, sans-serif;
+}
+
+.modern-login-subtitle {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin: 0 0 30px 0;
+    font-family: Satoshi, sans-serif;
+}
+
+#authForm {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#authForm input[type="text"] {
+    width: 100%;
+    padding: 15px;
+    background-color: #2a2a2a;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+#authForm input[type="text"]:focus {
+    outline: none;
+    border-color: mediumturquoise;
+}
+
+#authForm button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color: transparent;
+    border: 2px solid mediumturquoise;
+    border-radius: 50px;
+    color: mediumturquoise;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#authForm button[type="submit"]:hover {
+    background-color: mediumturquoise;
+    color: #1a1a1a;
+}
+
+#ui-cola-quantity {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+    background-color: white;
+    border: 1px solid transparent;
+    border-radius: 15px;
+    color: black;
+    font-size: 1rem;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: Satoshi, sans-serif;
+}
+
+#ui-cola-quantity:focus {
+    border-color: mediumturquoise;
+    outline-color: mediumturquoise;
+
 }

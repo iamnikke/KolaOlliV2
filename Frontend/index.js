@@ -110,7 +110,7 @@ if (!username) {
   bgMusic = playSound('bgmusic', true);
 
   // piilota formi
-  document.getElementById('authForm').style.display = 'none';
+  document.querySelector('.main-game-login-screen').style.display = 'none';
 
   // fetch user data
   fetch(`${API_BASE}/authenticate?username=${username}`).
@@ -241,12 +241,12 @@ document.querySelectorAll('.ui-select-country').forEach(button => {
 });
 
 // päivittää kaikki tiedot
-const updatePlayerUI = (user) => {
-  document.getElementById('ui-money').textContent = parseFloat(user.money).
-      toFixed(2);
+const updatePlayerUI = (user, skipMoney = false) => {
+  if (!skipMoney) {
+    document.getElementById('ui-money').textContent = parseFloat(user.money).toFixed(2);
+  }
   document.getElementById('ui-location').textContent = user.location;
-  document.getElementById('ui-total-travel').textContent = parseFloat(
-      user.total_travel_km).toFixed(2);
+  document.getElementById('ui-total-travel').textContent = parseFloat(user.total_travel_km).toFixed(2);
   document.getElementById('ui-cola').textContent = user.coca_cola;
   if (user.clock) {
     document.getElementById('ui-clock').textContent = user.clock;
@@ -305,9 +305,9 @@ document.getElementById('btn-fly').addEventListener('click', async () => {
     const data = await response.json();
 
     if (data.success) {
-      // päivitä ui
+
       currentSalesProfit = data.sales_profit;
-      updatePlayerUI(data.user);
+      updatePlayerUI(data.user, true);
 
       // piilota flight menu
       document.querySelector('.ui-flight-container').style.display = 'none';
@@ -427,7 +427,8 @@ document.getElementById('btn-return-home').
         const data = await response.json();
 
         if (data.success) {
-            // Update UI with the final money/cola including the father's bonus
+          // päivitä ui
+            currentSalesProfit = data.sales_profit;
             updatePlayerUI(data.user);
 
             // Cleanup
